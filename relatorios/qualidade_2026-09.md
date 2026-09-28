@@ -1,5 +1,5 @@
 # Relatório de qualidade — exportação 2026-09
-Gerado em 2026-09-28 13:11.
+Gerado em 2026-09-28 19:08.
 
 ## Integridade dos arquivos
 - Todos os arquivos íntegros.
@@ -12,7 +12,7 @@ Gerado em 2026-09-28 13:11.
 
 ## Publicações depositadas por mais de uma unidade
 - Obras com registros de ≥ 2 unidades depositantes: 612
-- Obras com ≥ 2 unidades (depositantes + afiliação dos autores na época): 6859
+- Obras com ≥ 2 unidades (depositantes + afiliação dos autores na época): 6865
 - Registros sem resumo (texto curto): 41.7%
 - Tipos de publicação não classificados: 0
 
@@ -24,10 +24,10 @@ A = determinístico · B = desambiguado · C = ambíguo · D = externo/sem candi
 
 | papel | nivel | n | pct |
 |---|---|---|---|
-| autor | A | 241607 | 29.7% |
-| autor | B | 151697 | 18.6% |
-| autor | C | 139080 | 17.1% |
-| autor | D | 281577 | 34.6% |
+| autor | A | 241610 | 29.7% |
+| autor | B | 151648 | 18.6% |
+| autor | C | 139178 | 17.1% |
+| autor | D | 281525 | 34.6% |
 | lider | A |   3044 | 95.4% |
 | lider | B |    115 | 3.6% |
 | lider | D |     32 | 1.0% |

@@ -33,7 +33,10 @@ tokens_nome <- function(x) {
 }
 
 # "TAVARES, S. C. C. de H." -> sobrenome "TAVARES", iniciais "SCCH".
-# Na assinatura as partículas vêm em minúsculas ("de", "da") e são descartadas.
+# Partículas são descartadas: em minúsculas ("de", "dos") e também quando
+# vêm por extenso em maiúsculas ("SANTOS, M. DOS" -> iniciais "M", e não "MD").
+# Uma letra isolada ("D.") continua sendo inicial.
+PARTICULAS_ASSINATURA <- c("DE", "DA", "DO", "DAS", "DOS", "DI", "DU", "DEL", "DELLA", "VAN", "VON", "DER")
 parse_assinatura <- function(x) {
   x <- stringr::str_squish(x)
   tem_virgula <- stringr::str_detect(x, ",")
@@ -41,7 +44,7 @@ parse_assinatura <- function(x) {
   resto <- ifelse(tem_virgula, sem_acento(stringr::str_remove(x, "^[^,]*,")), "")
   toks <- stringr::str_split(resto, "[\\s\\.\\-]+")
   ini <- vapply(toks, function(t) {
-    t <- t[nzchar(t) & grepl("^[A-Z]", t)]
+    t <- t[nzchar(t) & grepl("^[A-Z]", t) & !(toupper(t) %in% PARTICULAS_ASSINATURA)]
     paste(substr(t, 1, 1), collapse = "")
   }, character(1))
   tibble::tibble(sobrenome = norm_nome(sob), iniciais = ini)

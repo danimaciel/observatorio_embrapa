@@ -4,6 +4,11 @@ test_that("parse_assinatura separa sobrenome e iniciais, descartando partículas
   expect_equal(x$iniciais, c("SCCH", "J", "D", "KXS"))
 })
 
+test_that("parse_assinatura descarta partículas em maiúsculas, mas mantém iniciais isoladas", {
+  x <- parse_assinatura(c("SANTOS, M. DOS", "OLIVEIRA, R. F. DE", "ANJOS, L. H. C. DOS", "SILVA, M. A. D."))
+  expect_equal(x$iniciais, c("M", "RF", "LHC", "MAD"))
+})
+
 test_that("assinatura_de_nome trata sufixos como parte do sobrenome", {
   x <- assinatura_de_nome(c("Maria Aparecida da Silva", "Paulo Sergio de Paula Herrmann Junior"))
   expect_equal(x$sobrenome, c("SILVA", "HERRMANN JUNIOR"))
