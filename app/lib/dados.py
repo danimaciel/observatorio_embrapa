@@ -149,10 +149,11 @@ def unidades() -> pd.DataFrame:
 
 
 def nome_unidade(unidade_id: str | None) -> str:
-    if not unidade_id:
+    # documentos sem unidade registrada chegam como None/NaN (ex.: ~3,7% das publicações)
+    if unidade_id is None or (isinstance(unidade_id, float) and pd.isna(unidade_id)) or unidade_id == "":
         return "—"
     u = unidades().set_index("unidade_id")
-    return u["nome_atual"].get(unidade_id, unidade_id)
+    return str(u["nome_atual"].get(unidade_id, unidade_id))
 
 
 def rotulo_unidade(unidade_id: str | None) -> str:
