@@ -26,9 +26,18 @@ DB = RAIZ / "data" / "processed" / "observatorio_app.duckdb"
 TIPOS = {"projeto": "Projetos", "publicacao": "Publicações", "tecnologia": "Tecnologias"}
 CORES_TIPO = {"projeto": "#2E7D32", "publicacao": "#1565C0", "tecnologia": "#EF6C00"}
 CAMADAS = {
-    "publicacoes": "Coautoria em publicações",
-    "tecnologias_indireta": "Tecnologias (via publicações citadas)",
+    "publicacoes": "Publicações em conjunto",
+    "tecnologias_indireta": "Tecnologia que usa publicação de outra unidade",
 }
+# Explicação exibida junto aos filtros de camada
+CAMADAS_AJUDA = (
+    "**Publicações em conjunto**: duas unidades se ligam quando participam da mesma publicação — "
+    "porque ambas a registraram no repositório ou porque entre os autores há pesquisadores das duas. "
+    "Ex.: um artigo com autores da Solos e do Semiárido liga Solos–Semiárido.\n\n"
+    "**Tecnologia que usa publicação de outra unidade**: a página de cada tecnologia cita publicações que a "
+    "fundamentam. Se uma tecnologia da unidade A cita uma publicação da unidade B, liga A–B: a pesquisa "
+    "de B contribuiu para um resultado de A. É uma evidência indireta e mais rara (≈ 320 citações)."
+)
 GRUPOS_PUB = {
     "periodico": "Artigo em periódico",
     "anais_completo": "Artigo em anais",

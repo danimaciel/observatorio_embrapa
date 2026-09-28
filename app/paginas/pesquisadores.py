@@ -18,14 +18,12 @@ def pessoas_com_producao() -> pd.DataFrame:
 pes = pessoas_com_producao()
 rot = dict(zip(pes.pessoa_id, pes.nome_exibicao + " — " + pes.unidade_ref_id.map(dados.rotulo_unidade)))
 ids = pes.pessoa_id.tolist()
-param = st.query_params.get("pessoa")
-sel = st.selectbox("Pesquisador", ids, index=ids.index(param) if param in ids else None,
-                   format_func=rot.get, placeholder="Digite o nome do pesquisador…")
+sel = ui.seletor_url("Pesquisador", ids, "pessoa", "pes_sel", format_func=rot.get,
+                     placeholder="Digite o nome do pesquisador…")
 if sel is None:
     st.info("Digite parte do nome para buscar. Estão listados os pesquisadores com projetos liderados ou "
             "publicações identificadas.")
     st.stop()
-st.query_params["pessoa"] = sel
 
 p = q("select * from pessoa where pessoa_id = ?", (sel,)).iloc[0]
 docs = q("""

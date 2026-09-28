@@ -46,6 +46,27 @@ def tabela_navegavel(df: pd.DataFrame, destino: str, coluna_id: str, key: str,
     st.caption("Clique numa linha para abrir o detalhe.")
 
 
+def seletor_url(rotulo: str, opcoes: list, param: str, key: str, **kw):
+    """Selectbox sincronizado com ?param= na URL, nos dois sentidos.
+
+    Um link (ou clique numa tabela) que muda o parâmetro prevalece sobre a
+    seleção guardada na sessão; escolher no seletor atualiza a URL."""
+    url = st.query_params.get(param)
+    marca = f"_url_{key}"
+    if url != st.session_state.get(marca):          # a URL mudou por fora
+        st.session_state[key] = url if url in opcoes else None
+        st.session_state[marca] = url
+    elif key not in st.session_state:
+        st.session_state[key] = None
+    sel = st.selectbox(rotulo, opcoes, key=key, **kw)
+    if sel is not None:
+        st.query_params[param] = sel
+    elif param in st.query_params:
+        del st.query_params[param]
+    st.session_state[marca] = sel
+    return sel
+
+
 def link(destino: str, valor: str, rotulo: str, icone: str | None = None) -> None:
     st.page_link(PAGINAS[destino], label=rotulo, icon=icone, query_params={destino: valor})
 
@@ -57,12 +78,14 @@ def aviso_tema_provisorio() -> None:
 
 
 def rede_pyvis(nos: pd.DataFrame, arestas: pd.DataFrame, altura: int = 620,
-               destaque: str | None = None, layout_arestas: pd.DataFrame | None = None) -> None:
+               destaque: str | None = None, layout_arestas: pd.DataFrame | None = None,
+               centro: str | None = None) -> None:
     """nos: id, rotulo, tamanho, grupo, titulo · arestas: origem, destino, peso, titulo
 
     O layout é calculado aqui (força dirigida, semente fixa) e enviado com
     posições fixas: sem simulação física no navegador, a rede não fica se
-    movendo. Nós continuam arrastáveis; zoom e tooltips funcionam."""
+    movendo. Clicar num nó destaca suas conexões e esmaece o resto; nós são
+    arrastáveis; zoom e tooltips funcionam. `centro` fixa um nó no meio."""
     # Layout sobre todas as relações (não só as exibidas), com pesos
     # normalizados: pesos brutos altos colapsariam os nós no centro.
     base = arestas if layout_arestas is None else layout_arestas
@@ -72,11 +95,26 @@ def rede_pyvis(nos: pd.DataFrame, arestas: pd.DataFrame, altura: int = 620,
     for _, a in base.iterrows():
         g.add_edge(str(a["origem"]), str(a["destino"]), weight=(float(a["peso"]) / wref) ** 0.5)
     k = 1.5 / max(g.number_of_nodes(), 1) ** 0.5
-    pos = nx.spring_layout(g, weight="weight", k=k, iterations=500, seed=42)
+    if centro and centro in g:
+        # Radial: foco no centro; parceiras em círculo, ordenadas por grupo,
+        # mais próximas quanto mais forte a relação com o foco.
+        import math
+        viz = [n for n in g.nodes if n != centro]
+        forca_rel = {n: g[centro][n]["weight"] if g.has_edge(centro, n) else 0 for n in viz}
+        fmax = max(forca_rel.values(), default=1) or 1
+        grupo = dict(zip(nos["id"].astype(str), nos.get("grupo", pd.Series(0, index=nos.index))))
+        viz.sort(key=lambda n: (grupo.get(n, 0), -forca_rel[n]))
+        pos = {centro: (0.0, 0.0)}
+        for i, n in enumerate(viz):
+            ang = 2 * math.pi * i / max(len(viz), 1)
+            r = 0.45 + 0.55 * (1 - forca_rel[n] / fmax)
+            pos[n] = (r * math.cos(ang), r * math.sin(ang))
+    else:
+        pos = nx.spring_layout(g, weight="weight", k=k, iterations=500, seed=42)
     raio = 380
 
     net = Network(height=f"{altura}px", width="100%", bgcolor="#ffffff", font_color="#222222",
-                  cdn_resources="remote")
+                  cdn_resources="remote", neighborhood_highlight=True)
     tam = nos["tamanho"].astype(float)
     escala = (tam - tam.min()) / (tam.max() - tam.min() + 1e-9)
     for (_, n), e in zip(nos.iterrows(), escala):

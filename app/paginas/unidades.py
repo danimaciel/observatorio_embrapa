@@ -7,15 +7,13 @@ from lib.dados import q
 a0, a1 = dados.periodo()
 un = dados.unidades()
 ids = un.unidade_id.tolist()
-param = st.query_params.get("unidade")
 
 st.title("Unidades")
-sel = st.selectbox("Unidade", ids, index=ids.index(param) if param in ids else None,
-                   format_func=dados.nome_unidade, placeholder="Escolha uma unidade")
+sel = ui.seletor_url("Unidade", ids, "unidade", "un_sel", format_func=dados.nome_unidade,
+                     placeholder="Escolha uma unidade")
 if sel is None:
     st.info("Escolha uma unidade para ver seu perfil, colaborações e temas.")
     st.stop()
-st.query_params["unidade"] = sel
 info = un.set_index("unidade_id").loc[sel]
 st.caption(f"{info.nome_atual} · sigla histórica {info.sigla_historica} · {info.uf} · {a0}–{a1}")
 
