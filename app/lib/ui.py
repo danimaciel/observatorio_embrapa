@@ -57,24 +57,45 @@ def aviso_tema_provisorio() -> None:
 
 
 def rede_pyvis(nos: pd.DataFrame, arestas: pd.DataFrame, altura: int = 620,
-               destaque: str | None = None) -> None:
-    """nos: id, rotulo, tamanho, grupo, titulo · arestas: origem, destino, peso, titulo"""
+               destaque: str | None = None, layout_arestas: pd.DataFrame | None = None) -> None:
+    """nos: id, rotulo, tamanho, grupo, titulo · arestas: origem, destino, peso, titulo
+
+    O layout é calculado aqui (força dirigida, semente fixa) e enviado com
+    posições fixas: sem simulação física no navegador, a rede não fica se
+    movendo. Nós continuam arrastáveis; zoom e tooltips funcionam."""
+    # Layout sobre todas as relações (não só as exibidas), com pesos
+    # normalizados: pesos brutos altos colapsariam os nós no centro.
+    base = arestas if layout_arestas is None else layout_arestas
+    g = nx.Graph()
+    g.add_nodes_from(nos["id"].astype(str))
+    wref = base["peso"].max() if not base.empty else 1
+    for _, a in base.iterrows():
+        g.add_edge(str(a["origem"]), str(a["destino"]), weight=(float(a["peso"]) / wref) ** 0.5)
+    k = 1.5 / max(g.number_of_nodes(), 1) ** 0.5
+    pos = nx.spring_layout(g, weight="weight", k=k, iterations=500, seed=42)
+    raio = 380
+
     net = Network(height=f"{altura}px", width="100%", bgcolor="#ffffff", font_color="#222222",
                   cdn_resources="remote")
-    net.barnes_hut(gravity=-6000, central_gravity=0.25, spring_length=160)
-    tam = nos["tamanho"]
+    tam = nos["tamanho"].astype(float)
     escala = (tam - tam.min()) / (tam.max() - tam.min() + 1e-9)
     for (_, n), e in zip(nos.iterrows(), escala):
         cor = PALETA[int(n.get("grupo", 0)) % len(PALETA)]
+        x, y = pos[str(n["id"])]
         net.add_node(str(n["id"]), label=str(n["rotulo"]), title=str(n.get("titulo", n["rotulo"])),
-                     size=12 + 38 * float(e), color=cor,
+                     size=8 + 22 * float(e), color=cor, x=float(x) * raio, y=float(y) * raio,
+                     physics=False, font={"size": 15, "strokeWidth": 4, "strokeColor": "#ffffff"},
                      borderWidth=4 if destaque and n["id"] == destaque else 1)
     wmax = arestas["peso"].max() if not arestas.empty else 1
     for _, a in arestas.iterrows():
-        net.add_edge(str(a["origem"]), str(a["destino"]), value=float(a["peso"]),
-                     title=str(a.get("titulo", "")), width=1 + 9 * float(a["peso"]) / wmax,
-                     color={"color": "#9aa5b1", "opacity": 0.6})
-    net.set_options('{"interaction": {"hover": true, "navigationButtons": true}}')
+        rel = float(a["peso"]) / wmax
+        net.add_edge(str(a["origem"]), str(a["destino"]), title=str(a.get("titulo", "")),
+                     width=0.5 + 6 * rel, color={"color": "#8a96a3", "opacity": 0.25 + 0.5 * rel})
+    net.set_options("""{
+      "physics": {"enabled": false},
+      "edges": {"smooth": false},
+      "interaction": {"hover": true, "navigationButtons": true, "dragNodes": true, "tooltipDelay": 120}
+    }""")
     components.html(net.generate_html(), height=altura + 20, scrolling=False)
 
 

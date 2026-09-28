@@ -49,9 +49,13 @@ ar["titulo"] = (ar.origem.map(dados.rotulo_unidade) + " — " + ar.destino.map(d
 
 t_rede, t_metr, t_evo = st.tabs(["Rede", "Unidades mais conectadas", "Evolução"])
 with t_rede:
-    ui.rede_pyvis(nos, ar, altura=650)
-    st.caption(f"{g.number_of_nodes()} unidades · {g.number_of_edges()} relações · "
-               f"{metr.comunidade.nunique()} comunidades (Louvain). Cor = comunidade; tamanho = intensidade.")
+    n_vis = st.slider("Relações exibidas (as mais fortes)", min_value=min(10, len(ar)), max_value=len(ar),
+                      value=min(120, len(ar)),
+                      help="Só afeta o desenho. Comunidades e métricas usam todas as relações.")
+    ui.rede_pyvis(nos, ar.nlargest(n_vis, "peso"), altura=650, layout_arestas=ar)
+    st.caption(f"{g.number_of_nodes()} unidades · {g.number_of_edges()} relações ({n_vis} exibidas) · "
+               f"{metr.comunidade.nunique()} comunidades (Louvain). Cor = comunidade; tamanho = intensidade. "
+               "Arraste os nós para reorganizar; use a roda do mouse para zoom.")
 
 with t_metr:
     ui.tabela_navegavel(
