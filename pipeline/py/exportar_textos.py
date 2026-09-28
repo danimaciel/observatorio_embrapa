@@ -31,5 +31,5 @@ for i in range(n):
     parte = faltam.iloc[i * tam:(i + 1) * tam]
     arq = destino / f"textos_para_embeddings_parte{i + 1:02d}de{n:02d}.parquet"
     parte.to_parquet(arq, index=False, compression="zstd")
-    print(f"{arq.name}: {len(parte):_} docs; {arq.stat().st_size / 1024**2:.1f} MB".replace("_", "."))
+    print(f"{arq.name}: " + f"{len(parte):,} docs; {arq.stat().st_size / 1024**2:.1f} MB".replace(",", "."))
 print(f"Total: {len(faltam):,} de {len(d):,} documentos sem embedding".replace(",", "."))
