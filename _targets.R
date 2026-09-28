@@ -9,9 +9,9 @@ tar_option_set(packages = c("dplyr", "tidyr", "stringr", "stringi", "readr", "re
 tar_source("pipeline/R")
 
 EXPORTACAO <- "2026-09"
-# TEMPORÁRIO: a exportação 2026-09 de publicações está truncada. Voltar para
-# FALSE quando a base completa for reexportada.
-PERMITIR_TRUNCADO <- TRUE
+# Arquivo truncado interrompe o pipeline. Use TRUE apenas para testes com
+# uma exportação sabidamente incompleta (o último registro é descartado).
+PERMITIR_TRUNCADO <- FALSE
 
 list(
   # Arquivos de origem e referência (reprocessam quando mudam) ----------------

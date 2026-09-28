@@ -12,6 +12,7 @@ não é versionada) ele é baixado de uma Release do GitHub, configurada em
 """
 
 import json
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -40,39 +41,62 @@ GRUPOS_PUB = {
 }
 
 
-def _baixar_da_release(cfg, destino: Path) -> None:
-    """Baixa o banco anexado a uma Release (funciona para repositório público ou privado)."""
+def _banco_da_release(cfg) -> Path:
+    """Garante uma cópia local do banco anexado à Release e devolve seu caminho.
+
+    A cópia leva o id do arquivo na Release no nome: republicar o banco (mesmo
+    com a mesma tag) gera um id novo, e o app baixa a versão nova ao reiniciar."""
     cab = {"Accept": "application/vnd.github+json", "User-Agent": "observatorio-embrapa"}
     if cfg.get("token"):
         cab["Authorization"] = f"Bearer {cfg['token']}"
     url = f"https://api.github.com/repos/{cfg['repo']}/releases/tags/{cfg['tag']}"
-    with urllib.request.urlopen(urllib.request.Request(url, headers=cab)) as r:
-        release = json.load(r)
-    asset = next((a for a in release["assets"] if a["name"] == cfg.get("arquivo", DB.name)), None)
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=cab), timeout=30) as r:
+            release = json.load(r)
+    except urllib.error.HTTPError as e:
+        if e.code in (401, 403, 404):
+            st.error("Não foi possível acessar os dados do Observatório no GitHub. O token de acesso pode ter "
+                     "expirado ou não ter permissão para o repositório de dados: gere um novo e atualize "
+                     "`token` nos secrets do app.")
+            st.stop()
+        raise
+    nome = cfg.get("arquivo", DB.name)
+    asset = next((a for a in release["assets"] if a["name"] == nome), None)
     if asset is None:
-        raise FileNotFoundError(f"{cfg.get('arquivo', DB.name)} não está na release {cfg['tag']}")
+        st.error(f"O arquivo `{nome}` não está na release `{cfg['tag']}`.")
+        st.stop()
+    destino = DB.parent / f"{Path(nome).stem}-{asset['id']}.duckdb"
+    if destino.exists() and destino.stat().st_size == asset["size"]:
+        return destino
     cab["Accept"] = "application/octet-stream"
     destino.parent.mkdir(parents=True, exist_ok=True)
     tmp = destino.with_suffix(".part")
-    with urllib.request.urlopen(urllib.request.Request(asset["url"], headers=cab)) as r, open(tmp, "wb") as f:
+    with urllib.request.urlopen(urllib.request.Request(asset["url"], headers=cab), timeout=60) as r, \
+            open(tmp, "wb") as f:
         while bloco := r.read(1 << 20):
             f.write(bloco)
     tmp.replace(destino)
+    for antigo in DB.parent.glob(f"{Path(nome).stem}-*.duckdb"):  # versões anteriores
+        if antigo != destino:
+            antigo.unlink(missing_ok=True)
+    return destino
 
 
 @st.cache_resource(show_spinner="Carregando a base do Observatório…")
 def conexao() -> duckdb.DuckDBPyConnection:
-    if not DB.exists():
-        try:
-            cfg = st.secrets.get("dados")
-        except Exception:  # sem secrets.toml
-            cfg = None
-        if not cfg:
-            st.error(f"Base não encontrada em `{DB}`. Rode o pipeline (`targets::tar_make()`) ou configure "
-                     "`[dados]` em `.streamlit/secrets.toml`.")
-            st.stop()
-        _baixar_da_release(cfg, DB)
-    return duckdb.connect(str(DB), read_only=True)
+    try:
+        cfg = st.secrets.get("dados")
+    except Exception:  # sem secrets.toml (uso local)
+        cfg = None
+    if cfg:
+        caminho = _banco_da_release(cfg)
+    elif DB.exists():
+        caminho = DB
+    else:
+        st.error(f"Base não encontrada em `{DB}`. Rode o pipeline (`targets::tar_make()`) ou configure "
+                 "`[dados]` em `.streamlit/secrets.toml`.")
+        st.stop()
+    return duckdb.connect(str(caminho), read_only=True)
 
 
 @st.cache_data(ttl=3600, show_spinner=False)

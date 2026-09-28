@@ -120,7 +120,8 @@ montar_pessoa_tecnologia <- function(doc_link, documento_pessoa, publicacao) {
     dplyr::filter(destino_na_base) |>
     dplyr::left_join(dplyr::select(publicacao, doc_uid, obra = obra_id), by = c("destino_uid" = "doc_uid")) |>
     dplyr::inner_join(dplyr::filter(documento_pessoa, papel == "autor") |>
-                        dplyr::select(obra = doc_uid, pessoa_id), by = "obra") |>
+                        dplyr::select(obra = doc_uid, pessoa_id), by = "obra",
+                      relationship = "many-to-many") |>
     dplyr::distinct(pessoa_id, tecnologia_uid = origem_uid, obra) |>
     dplyr::mutate(vinculo = "declarado")
 }

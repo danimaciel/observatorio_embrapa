@@ -9,10 +9,20 @@ Implementadas as fases 1 (ingestão e harmonização) e 2 (resolução de identi
 
 ## Como executar
 
-1. Coloque as exportações em `data/raw/<AAAA-MM>/` (projetos, publicações e tecnologias em CSV + `AutorPessoalEmbrapa.xls`).
-2. Ajuste `EXPORTACAO` em `_targets.R`.
-3. No R: `targets::tar_make()`.
-4. Testes: `Rscript tests/testthat.R`.
+1. Baixe as exportações do mês direto do Redape (projetos, publicações e tecnologias, publicadas todo dia 1º):
+   ```bash
+   Rscript pipeline/baixar_dados.R 2026-10
+   ```
+   O download retoma sozinho se a conexão cair e só aceita o arquivo com o tamanho informado pelo Redape.
+   Rodar de novo é seguro: arquivos já completos não são baixados outra vez.
+2. Copie a base de pessoas (`AutorPessoalEmbrapa.xls`, interna, não está no Redape) para `data/raw/<AAAA-MM>/`.
+3. Ajuste `EXPORTACAO` em `_targets.R`.
+4. No R: `targets::tar_make()`. Arquivo truncado interrompe o pipeline.
+5. Testes: `Rscript tests/testthat.R`.
+
+Fontes no Redape: projetos [doi:10.48432/EZDXWF](https://doi.org/10.48432/EZDXWF) ·
+publicações [doi:10.48432/TRBT0S](https://doi.org/10.48432/TRBT0S) ·
+tecnologias [doi:10.48432/ZQE5FV](https://doi.org/10.48432/ZQE5FV).
 
 Pacotes: `dplyr tidyr stringr stringi readr readxl purrr igraph arrow duckdb DBI janitor targets testthat`.
 
