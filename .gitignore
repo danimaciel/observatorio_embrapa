@@ -25,3 +25,4 @@ __pycache__/
 
 # Segredos do Streamlit (token de acesso à Release)
 .streamlit/secrets.toml
+.venv-nlp/

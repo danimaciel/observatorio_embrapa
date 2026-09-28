@@ -29,6 +29,26 @@ CAMADAS = {
     "publicacoes": "Publicações em conjunto",
     "tecnologias_indireta": "Tecnologia que usa publicação de outra unidade",
 }
+# Explicação das duas medidas de relação (exemplos reais, publicações 1990–2026)
+METRICAS_AJUDA = """
+**Intensidade — quanto duas unidades trabalham juntas, em volume.**
+É a contagem de documentos em comum, com um desconto para documentos que envolvem muitas unidades: numa
+publicação com só 2 unidades, o par recebe 1 ponto; numa com 3 unidades, cada um dos 3 pares recebe ½; e
+assim por diante. Assim, um trabalho feito por 10 unidades não pesa como 10 parcerias fortes.
+*Ex.: Hortaliças e Solos têm 88 publicações em comum → intensidade 63* (parte delas envolve outras unidades).
+
+**Força de associação — se a parceria é mais forte do que o esperado pelo tamanho das unidades.**
+Unidades grandes se cruzam com todo mundo só por serem grandes. A força compara a intensidade observada com a
+que se esperaria se as parcerias fossem distribuídas ao acaso, proporcionalmente ao volume de cada unidade:
+**1** = o esperado · **2** = o dobro · **abaixo de 1** = menos que o esperado.
+*Ex.: Cerrados e Recursos Genéticos têm intensidade alta (54), mas força 1,7 — duas das maiores unidades,
+parceria próxima do esperado. Gado de Corte e Pantanal têm intensidade menor (21), mas força 4,1 —
+colaboram quatro vezes mais do que o tamanho delas faria prever: uma afinidade específica.*
+
+**Em resumo:** a intensidade responde *"com quem trabalha mais?"*; a força responde *"com quem tem uma
+afinidade especial, descontado o tamanho?"*.
+"""
+
 # Explicação exibida junto aos filtros de camada
 CAMADAS_AJUDA = (
     "**Publicações em conjunto**: duas unidades se ligam quando participam da mesma publicação — "

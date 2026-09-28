@@ -1,0 +1,15 @@
+# Ambiente do processamento semântico (embeddings e temas). Só para o
+# pipeline — o app usa requirements.txt (sem PyTorch).
+# Instalação:
+#   uv venv .venv-nlp --python 3.12
+#   uv pip install --python .venv-nlp -r pipeline/py/requirements-nlp.txt --index-strategy unsafe-best-match --extra-index-url https://download.pytorch.org/whl/cpu
+torch
+sentence-transformers>=3.0
+bertopic>=0.16
+umap-learn>=0.5
+hdbscan>=0.8.33
+scikit-learn
+pandas
+pyarrow
+duckdb
+numpy

@@ -22,12 +22,14 @@ camadas = c1.pills("Tipo de relação", list(dados.CAMADAS), selection_mode="mul
 c2, c3 = st.columns([2, 3])
 metrica = c2.radio("Medir a relação por", ["peso", "forca"], horizontal=True,
                    format_func={"peso": "Intensidade", "forca": "Força de associação"}.get,
-                   help="**Intensidade**: quantidade de documentos em comum (contagem fracionária). "
-                        "**Força de associação**: intensidade observada ÷ esperada pelo tamanho das duas "
-                        "unidades (> 1 = relação acima do esperado; destaca afinidades de unidades pequenas).")
+                   help="Intensidade = volume de trabalho em comum. Força de associação = afinidade além do "
+                        "esperado pelo tamanho. Detalhes em *O que são intensidade e força de associação?*")
 min_docs = c3.slider("Ignorar relações com menos de … documentos", 1, 20, 1 if foco else 2)
 
-with st.expander("Como ler esta página"):
+e1, e2 = st.columns(2)
+with e2.expander("O que são intensidade e força de associação?"):
+    st.markdown(dados.METRICAS_AJUDA)
+with e1.expander("Como ler esta página"):
     st.markdown(dados.CAMADAS_AJUDA + "\n\n"
                 "**Na rede:** cada círculo é uma unidade (tamanho = volume de relações; cor = comunidade, isto é, "
                 "grupo de unidades que colaboram mais entre si). Clique num círculo para destacar suas ligações; "
@@ -72,7 +74,13 @@ def nos_de(df_metr: pd.DataFrame) -> pd.DataFrame:
 
 
 rotulo_rede = f"Relações de {dados.rotulo_unidade(foco)}" if foco else "Rede"
-t_rede, t_metr, t_evo = st.tabs([rotulo_rede, "Ranking geral das unidades", "Evolução"])
+ranking = metr.sort_values("intensidade", ascending=False).reset_index(drop=True)
+ranking.insert(0, "posicao", ranking.index + 1)
+if foco:  # o ranking geral é uma visão da rede inteira: fica só na visão geral
+    t_rede, t_evo = st.tabs([rotulo_rede, "Evolução"])
+    t_metr = None
+else:
+    t_rede, t_metr, t_evo = st.tabs([rotulo_rede, "Ranking geral das unidades", "Evolução"])
 
 with t_rede:
     if foco is None:
@@ -101,6 +109,12 @@ with t_rede:
         st.info(f"{dados.nome_unidade(foco)} não tem relações com esses filtros.")
     else:
         # Unidade em foco ----------------------------------------------------------
+        lin = ranking[ranking.unidade_id == foco].iloc[0]
+        st.info(f"**{dados.nome_unidade(foco)}** relaciona-se com **{lin.parceiras}** das {len(ranking) - 1} outras "
+                f"unidades. No conjunto da Embrapa, é a **{lin.posicao}ª** de {len(ranking)} em volume total de "
+                f"relações e pertence à comunidade {lin.comunidade} (grupo de unidades que colaboram mais entre si). "
+                "Para comparar todas as unidades, limpe a unidade em foco e veja *Ranking geral das unidades*.",
+                icon=":material/info:")
         rel = ar[(ar.origem == foco) | (ar.destino == foco)].copy()
         rel["parceira_id"] = rel.origem.where(rel.origem != foco, rel.destino)
         rel = rel.sort_values("peso", ascending=False)
@@ -159,35 +173,29 @@ with t_rede:
             ui.tabela_navegavel(lista, "doc", "doc_uid", f"redes_docs_{foco}", altura=380)
             ui.link("unidade", p.parceira_id, f"Abrir o perfil de {p.parceira}", ":material/apartment:")
 
-with t_metr:
-    ranking = metr.sort_values("intensidade", ascending=False).reset_index(drop=True)
-    ranking.insert(0, "posicao", ranking.index + 1)
-    st.caption("Todas as unidades da Embrapa, ordenadas pela intensidade total de relações com **todas** as "
-               "demais (soma das suas ligações). É uma visão da rede inteira — não muda com a unidade em foco. "
-               "**Parceiras**: com quantas unidades se relaciona. **Intermediação**: quanto a unidade funciona "
-               "como ponte entre outras que pouco se relacionam diretamente.")
-    if foco and foco in set(ranking.unidade_id):
-        lin = ranking[ranking.unidade_id == foco].iloc[0]
-        st.info(f"**{dados.nome_unidade(foco)}** é a **{lin.posicao}ª** de {len(ranking)} unidades em intensidade "
-                f"total, relaciona-se com **{lin.parceiras}** unidades e pertence à comunidade {lin.comunidade}. "
-                f"As parceiras específicas dela estão na aba *{rotulo_rede}*.", icon=":material/info:")
-        ranking["unidade"] = ranking.apply(lambda x: f"▶ {x.unidade}" if x.unidade_id == foco else x.unidade, axis=1)
-    ui.tabela_navegavel(
-        ranking, "unidade", "unidade_id", "redes_metr",
-        colunas={"posicao": st.column_config.NumberColumn("Posição", width="small"),
-                 "unidade": "Unidade", "parceiras": "Parceiras", "comunidade": "Comunidade",
-                 "intensidade": st.column_config.NumberColumn("Intensidade total", format="%.1f"),
-                 "intermediacao": st.column_config.NumberColumn("Intermediação", format="%.3f",
-                                                                help="Quanto a unidade conecta outras")})
-    st.markdown("**Pares de unidades com relações mais intensas** (rede inteira)")
-    top = r.sort_values(metrica, ascending=False).head(30).assign(
-        unidade_a=lambda d: d.unidade1.map(dados.rotulo_unidade),
-        unidade_b=lambda d: d.unidade2.map(dados.rotulo_unidade))
-    st.dataframe(top[["unidade_a", "unidade_b", "n_docs", "peso", "forca"]], hide_index=True,
-                 width="stretch",
-                 column_config={"peso": st.column_config.NumberColumn("Intensidade", format="%.1f"),
-                                "forca": st.column_config.NumberColumn("Força de associação", format="%.2f"),
-                                "n_docs": "Documentos"})
+if t_metr is not None:
+    with t_metr:
+        st.caption("Todas as unidades da Embrapa, ordenadas pela intensidade total de relações com **todas** as "
+                   "demais (soma das suas ligações). É uma visão da rede inteira — não muda com a unidade em foco. "
+                   "**Parceiras**: com quantas unidades se relaciona. **Intermediação**: quanto a unidade funciona "
+                   "como ponte entre outras que pouco se relacionam diretamente.")
+        ui.tabela_navegavel(
+            ranking, "unidade", "unidade_id", "redes_metr",
+            colunas={"posicao": st.column_config.NumberColumn("Posição", width="small"),
+                     "unidade": "Unidade", "parceiras": "Parceiras", "comunidade": "Comunidade",
+                     "intensidade": st.column_config.NumberColumn("Intensidade total", format="%.1f"),
+                     "intermediacao": st.column_config.NumberColumn("Intermediação", format="%.3f",
+                                                                    help="Quanto a unidade conecta outras")})
+        st.markdown("**Pares de unidades com relações mais intensas** (rede inteira)")
+        top = r.sort_values(metrica, ascending=False).head(30).assign(
+            unidade_a=lambda d: d.unidade1.map(dados.rotulo_unidade),
+            unidade_b=lambda d: d.unidade2.map(dados.rotulo_unidade))
+        st.dataframe(top[["unidade_a", "unidade_b", "n_docs", "peso", "forca"]], hide_index=True,
+                     width="stretch",
+                     column_config={"unidade_a": "Unidade", "unidade_b": "Unidade parceira",
+                                    "peso": st.column_config.NumberColumn("Intensidade", format="%.1f"),
+                                    "forca": st.column_config.NumberColumn("Força de associação", format="%.2f"),
+                                    "n_docs": "Documentos"})
 
 with t_evo:
     jan = st.select_slider("Janela (anos)", [3, 5, 10], value=5)

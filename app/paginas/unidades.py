@@ -48,8 +48,8 @@ t_col, t_evo, t_pes, t_tema, t_prod = st.tabs(
 with t_col:
     st.markdown("#### Com quais unidades mais se relaciona — e em torno de quais temas")
     c1, c2 = st.columns([2, 1])
-    camadas = c1.pills("Evidência", list(dados.CAMADAS), selection_mode="multi", default=list(dados.CAMADAS),
-                       format_func=dados.CAMADAS.get, key="un_camadas")
+    camadas = c1.pills("Tipo de relação", list(dados.CAMADAS), selection_mode="multi", default=list(dados.CAMADAS),
+                       format_func=dados.CAMADAS.get, key="un_camadas", help=dados.CAMADAS_AJUDA)
     metrica = c2.radio("Ordenar por", ["peso", "forca", "n_docs"], horizontal=True,
                        format_func={"peso": "Intensidade", "forca": "Força de associação",
                                     "n_docs": "Nº de documentos"}.get)
@@ -66,8 +66,8 @@ with t_col:
                      labels={"peso": "Intensidade (contagem fracionária)", "forca": "Força de associação",
                              "n_docs": "Documentos", "parceira": ""})
         st.plotly_chart(fig, width="stretch")
-        st.caption("**Intensidade**: soma fracionária dos documentos em comum. **Força de associação**: "
-                   "razão observado/esperado dado o tamanho das duas unidades (> 1 = afinidade acima do esperado).")
+        with st.expander("O que são intensidade e força de associação?"):
+            st.markdown(dados.METRICAS_AJUDA)
 
         parceira = st.selectbox("Temas da colaboração com", r.parceira_id.tolist(),
                                 format_func=dados.nome_unidade)
