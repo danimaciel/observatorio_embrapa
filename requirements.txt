@@ -1,0 +1,7 @@
+streamlit>=1.50
+duckdb>=1.1
+pandas>=2.2
+plotly>=6.0
+networkx>=3.4
+pyvis>=0.3.2
+pyarrow>=17

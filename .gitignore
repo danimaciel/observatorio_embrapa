@@ -1,0 +1,27 @@
+# Dados: nunca versionar (volume e LGPD — a base de pessoas é interna)
+data/raw/
+data/interim/
+data/processed/
+*.RData
+*.rds
+*.xls
+*.xlsx
+*.duckdb
+
+# Amostras de auditoria contêm atribuições nominais para revisão interna
+relatorios/auditoria_*
+relatorios/revisao_*
+
+# targets / R
+_targets/
+.Rproj.user/
+.Rhistory
+.RData
+.Rapp.history
+
+# Python
+__pycache__/
+.venv/
+
+# Segredos do Streamlit (token de acesso à Release)
+.streamlit/secrets.toml

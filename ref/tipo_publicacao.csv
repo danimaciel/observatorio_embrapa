@@ -1,0 +1,19 @@
+tipo_original,tipo_grupo
+Artigo de periódico,periodico
+Artigo em anais e proceedings,anais_completo
+Resumo em anais e proceedings,anais_resumo
+"Parte de livro (capítulos de livros, trabalhos e resumos publicados em anais ou em coletâneas)",livro_capitulo
+Livros,livro_capitulo
+"Obras de referência (dicionários, enciclopédias, etc.)",livro_capitulo
+Teses,tese
+Folhetos,tecnica
+Relatórios técnicos,tecnica
+Manuais,tecnica
+Folders,divulgacao
+"Artigo de divulgação na mídia (artigos de jornal impresso, eletrônico; artigos em sites e blogs)",divulgacao
+Filmes e gravações de vídeo,divulgacao
+Anais e Proceedings de eventos (considerados no todo),outros
+Material não-convencional (literatura cinza),outros
+Mapas,outros
+Bibliografia,outros
+Fascículos de periódicos,outros
