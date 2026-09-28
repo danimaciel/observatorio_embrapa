@@ -65,13 +65,17 @@ with t_col:
     if co.empty:
         st.caption("Sem coautorias com outros pesquisadores Embrapa identificados no período.")
     else:
-        # palavras-chave dos documentos em comum com cada coautor (temas provisórios)
+        # temas dos documentos em comum com cada coautor (palavras-chave se não houver modelo de temas)
         todos = tuple(sorted({d for l in co.docs for d in l}))
-        kw = q("""select doc_uid, keyword_norm, lower(any_value(keyword_raw)) palavra from documento_keyword
-                  where list_contains(?, doc_uid) group by all""", (list(todos),))
+        if dados.tem_semantica():
+            kw = q("select doc_uid, tema_id from doc_tema where list_contains(?, doc_uid)", (list(todos),))
+            kw["palavra"] = kw.tema_id.map(dados.rotulo_tema)
+        else:
+            kw = q("""select doc_uid, keyword_norm, lower(any_value(keyword_raw)) palavra from documento_keyword
+                      where list_contains(?, doc_uid) group by all""", (list(todos),))
         def temas(lista):
             k = kw[kw.doc_uid.isin(lista)].groupby("palavra").size().nlargest(3)
-            return ", ".join(k.index)
+            return " · ".join(k.index)
         co["temas_em_comum"] = co.docs.map(temas)
 
         st.markdown("#### Pesquisadores com quem mais trabalha")
@@ -80,7 +84,7 @@ with t_col:
             "pes_coaut", altura=420,
             colunas={"peso": st.column_config.NumberColumn("Intensidade", format="%.2f",
                                                            help="Contagem fracionária de Newman"),
-                     "temas_em_comum": "Temas em comum (palavras-chave)"})
+                     "temas_em_comum": "Temas em comum"})
 
         st.markdown("#### Em quais unidades")
         pu = co.groupby(["unidade_ref_id", "unidade"], as_index=False).agg(
@@ -124,13 +128,18 @@ with t_evo:
                            color_discrete_map={dados.TIPOS[k]: v for k, v in dados.CORES_TIPO.items()},
                            labels={"ano": "Ano", "size": "Documentos", "tipo": ""}), width="stretch")
     ui.aviso_tema_provisorio()
-    kw = q("""select k.doc_uid, lower(any_value(k.keyword_raw)) palavra, d.ano from documento_keyword k
-              join documento d using (doc_uid) where list_contains(?, k.doc_uid) group by k.doc_uid, k.keyword_norm, d.ano""",
-           (docs.doc_uid.tolist(),))
+    if dados.tem_semantica():
+        kw = q("""select t.doc_uid, t.tema_id, d.ano from doc_tema t join documento d using (doc_uid)
+                  where list_contains(?, t.doc_uid)""", (docs.doc_uid.tolist(),))
+        kw["palavra"] = kw.tema_id.map(dados.rotulo_tema)
+    else:
+        kw = q("""select k.doc_uid, lower(any_value(k.keyword_raw)) palavra, d.ano from documento_keyword k
+                  join documento d using (doc_uid) where list_contains(?, k.doc_uid)
+                  group by k.doc_uid, k.keyword_norm, d.ano""", (docs.doc_uid.tolist(),))
     if not kw.empty:
         jan = 5
         kw["periodo"] = ((kw.ano // jan) * jan).astype(str) + "–" + ((kw.ano // jan) * jan + jan - 1).astype(str)
-        topk = kw.palavra.value_counts().head(15).index
+        topk = kw.palavra.value_counts().head(12).index
         h = kw[kw.palavra.isin(topk)].groupby(["palavra", "periodo"]).size().reset_index(name="n")
         st.plotly_chart(px.density_heatmap(h, x="periodo", y="palavra", z="n", color_continuous_scale="Greens",
                                            labels={"periodo": "Período", "palavra": "", "n": "Documentos"},

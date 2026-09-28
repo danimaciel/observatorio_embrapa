@@ -13,6 +13,7 @@ PAGINAS = {
     "temas": "paginas/temas.py",
     "pessoa": "paginas/pesquisadores.py",
     "doc": "paginas/documentos.py",
+    "tema": "paginas/temas.py",
 }
 PALETA = ["#1565C0", "#2E7D32", "#EF6C00", "#6A1B9A", "#C62828", "#00838F", "#9E9D24",
           "#4E342E", "#AD1457", "#283593", "#558B2F", "#F9A825"]
@@ -72,9 +73,14 @@ def link(destino: str, valor: str, rotulo: str, icone: str | None = None) -> Non
 
 
 def aviso_tema_provisorio() -> None:
-    st.info("**Temas provisórios:** enquanto o modelo de temas (BERTopic sobre embeddings) não é "
-            "gerado, os temas são aproximados pelas palavras-chave declaradas nos documentos.",
-            icon=":material/info:")
+    from lib import dados
+    if dados.tem_semantica():
+        st.caption("Temas identificados automaticamente (BERTopic sobre embeddings multilíngues) a partir de "
+                   "título, resumo e palavras-chave. Os rótulos são os termos mais característicos de cada tema "
+                   "e podem ser revisados por especialistas.")
+    else:
+        st.info("**Temas provisórios:** enquanto o modelo de temas não é gerado, os temas são aproximados "
+                "pelas palavras-chave declaradas nos documentos.", icon=":material/info:")
 
 
 def rede_pyvis(nos: pd.DataFrame, arestas: pd.DataFrame, altura: int = 620,

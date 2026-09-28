@@ -116,11 +116,22 @@ with t4:
     ui.tabela_navegavel(tab.sort_values("unidade"), "unidade", "unidade_id", "emb_unid")
 
 st.subheader("Temas em destaque")
-ui.aviso_tema_provisorio()
-k = q("""
-    select lower(any_value(k.keyword_raw)) palavra, count(distinct k.doc_uid) n from documento_keyword k
-    join documento d using (doc_uid) where d.ano between ? and ? group by k.keyword_norm
-    order by n desc limit 20
-""", (a0, a1))
-st.plotly_chart(px.bar(k.sort_values("n"), x="n", y="palavra", orientation="h",
-                       labels={"n": "Documentos", "palavra": ""}), width="stretch")
+if dados.tem_semantica():
+    k = q("""select t.tema_id, count(*) n from doc_tema t join documento d using (doc_uid)
+             where d.ano between ? and ? group by 1 order by n desc limit 20""", (a0, a1))
+    k["tema"] = k.tema_id.map(dados.rotulo_tema)
+    k["macro"] = k.tema_id.map(dados.temas().set_index("tema_id").pai_id).map(dados.rotulo_tema)
+    st.plotly_chart(px.bar(k.sort_values("n"), x="n", y="tema", color="macro", orientation="h", height=620,
+                           labels={"n": "Documentos", "tema": "", "macro": "Macrotema"}), width="stretch")
+    ui.tabela_navegavel(k[["tema_id", "tema", "macro", "n"]], "tema", "tema_id", "emb_temas", altura=300,
+                        colunas={"tema": "Tema", "macro": "Macrotema", "n": "Documentos"})
+    ui.aviso_tema_provisorio()
+else:
+    ui.aviso_tema_provisorio()
+    k = q("""
+        select lower(any_value(k.keyword_raw)) palavra, count(distinct k.doc_uid) n from documento_keyword k
+        join documento d using (doc_uid) where d.ano between ? and ? group by k.keyword_norm
+        order by n desc limit 20
+    """, (a0, a1))
+    st.plotly_chart(px.bar(k.sort_values("n"), x="n", y="palavra", orientation="h",
+                           labels={"n": "Documentos", "palavra": ""}), width="stretch")

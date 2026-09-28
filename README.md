@@ -26,6 +26,20 @@ tecnologias [doi:10.48432/ZQE5FV](https://doi.org/10.48432/ZQE5FV).
 
 Pacotes: `dplyr tidyr stringr stringi readr readxl purrr igraph arrow duckdb DBI janitor targets testthat`.
 
+## Camada semântica (embeddings, similaridade e temas)
+
+Roda dentro do `tar_make()` (passos em Python, ambiente `.venv-nlp`, ver `pipeline/py/requirements-nlp.txt`):
+
+- `embeddings.py` — vetores `multilingual-e5-base` com cache por hash do texto: só documentos novos ou
+  alterados são calculados (CPU local ~3 docs/s; a carga inicial foi feita no Colab com GPU, via
+  `pipeline/colab/embeddings_colab.ipynb` + `exportar_textos.py`).
+- `similaridade.py` — 10 documentos mais semelhantes de cada tipo e proximidade temática entre unidades.
+- `temas.py` — atribui os documentos aos temas salvos. Para **reajustar** o modelo (ex.: uma vez por ano):
+  `.venv-nlp/Scripts/python pipeline/py/temas.py --reajustar`.
+- Rótulos dos temas: `relatorios/temas_para_curadoria.csv` lista todos os temas; para renomear, copie
+  `tema_id` e o novo `rotulo` para `ref/temas_rotulos.csv`.
+- Avaliação dos modelos: `relatorios/avaliacao_modelos.md`.
+
 ## Aplicação (Streamlit)
 
 ```bash

@@ -74,12 +74,18 @@ with t_col:
         dd = dados.docs_da_relacao(sel, parceira, a0, a1, tuple(camadas))
         ca, cb = st.columns(2)
         with ca:
+            if dados.tem_semantica():
+                tt = dados.temas_de_docs(tuple(dd), 12)
+                if not tt.empty:
+                    st.markdown("**Temas dos documentos em comum**")
+                    st.plotly_chart(px.bar(tt.sort_values("n"), x="n", y="rotulo", orientation="h",
+                                           labels={"n": "Documentos em comum", "rotulo": ""}), width="stretch")
+            else:
+                kw = dados.palavras_chave(tuple(dd), 15)
+                if not kw.empty:
+                    st.plotly_chart(px.bar(kw.sort_values("n"), x="n", y="palavra", orientation="h",
+                                           labels={"n": "Documentos em comum", "palavra": ""}), width="stretch")
             ui.aviso_tema_provisorio()
-            kw = dados.palavras_chave(tuple(dd), 15)
-            if not kw.empty:
-                st.plotly_chart(px.bar(kw.sort_values("n"), x="n", y="palavra", orientation="h",
-                                       labels={"n": "Documentos em comum", "palavra": ""}),
-                                width="stretch")
         with cb:
             st.markdown(f"**Documentos em comum** ({len(dd)})")
             lista = q("select doc_uid, tipo_doc tipo, ano, titulo from documento where list_contains(?, doc_uid) "
@@ -115,31 +121,53 @@ with t_pes:
     ui.tabela_navegavel(p, "pessoa", "pessoa_id", "un_pesq", altura=500)
 
 with t_tema:
-    ui.aviso_tema_provisorio()
-    esp = q("""
-        with base as (
-            select k.keyword_norm, any_value(lower(k.keyword_raw)) palavra, k.doc_uid,
-                   max(case when du.unidade_id = ? then 1 else 0 end) da_unidade
-            from documento_keyword k join documento d using (doc_uid)
-            left join documento_unidade du using (doc_uid)
-            where d.ano between ? and ? group by k.keyword_norm, k.doc_uid),
-        tot as (select count(distinct doc_uid) N, count(distinct case when da_unidade = 1 then doc_uid end) Nu from base)
-        select any_value(palavra) palavra, sum(da_unidade) n_unidade, count(*) n_embrapa,
-               (sum(da_unidade) / any_value(Nu)) / (count(*) / any_value(N)) especializacao
-        from base, tot group by keyword_norm having sum(da_unidade) >= 3
-    """, (sel, a0, a1))
-    c1, c2 = st.columns(2)
-    c1.markdown("**Palavras-chave mais frequentes**")
-    c1.dataframe(esp.nlargest(20, "n_unidade")[["palavra", "n_unidade", "especializacao"]], hide_index=True,
-                 column_config={"n_unidade": "Documentos", "especializacao": st.column_config.NumberColumn(
-                     "Especialização", format="%.1f")}, width="stretch")
-    c2.markdown("**Especialidades relativas** (vs. Embrapa)")
-    c2.dataframe(esp[esp.n_unidade >= 5].nlargest(20, "especializacao")[["palavra", "n_unidade", "especializacao"]],
-                 hide_index=True, width="stretch",
-                 column_config={"n_unidade": "Documentos", "especializacao": st.column_config.NumberColumn(
-                     "Especialização", format="%.1f")})
-    st.caption("Especialização = participação do termo na unidade ÷ participação na Embrapa (> 1 = mais "
-               "frequente na unidade que na média institucional).")
+    if dados.tem_semantica():
+        esp = q("""
+            with base as (
+                select t.doc_uid, t.tema_id, max(case when du.unidade_id = ? then 1 else 0 end) da_unidade
+                from doc_tema t join documento d using (doc_uid) left join documento_unidade du using (doc_uid)
+                where d.ano between ? and ? group by t.doc_uid, t.tema_id),
+            tot as (select count(*) N, sum(da_unidade) Nu from base)
+            select tema_id, sum(da_unidade) n_unidade, count(*) n_embrapa,
+                   (sum(da_unidade) / any_value(Nu)) / (count(*) / any_value(N)) especializacao
+            from base, tot group by tema_id having sum(da_unidade) >= 3
+        """, (sel, a0, a1))
+        esp["tema"] = esp.tema_id.map(dados.rotulo_tema)
+        esp["macro"] = esp.tema_id.map(dados.temas().set_index("tema_id").pai_id).map(dados.rotulo_tema)
+        cfg = {"tema": "Tema", "macro": "Macrotema", "n_unidade": "Documentos",
+               "especializacao": st.column_config.NumberColumn(
+                   "Especialização", format="%.1f",
+                   help="Peso do tema na unidade ÷ peso do tema na Embrapa (> 1 = mais que a média)")}
+        c1, c2 = st.columns(2)
+        with c1:
+            st.markdown("**Temas principais** (mais documentos)")
+            ui.tabela_navegavel(esp.nlargest(20, "n_unidade")[["tema_id", "tema", "n_unidade", "especializacao"]],
+                                "tema", "tema_id", "un_tema_top", colunas=cfg, altura=460)
+        with c2:
+            st.markdown("**Especialidades relativas** (vs. Embrapa)")
+            ui.tabela_navegavel(esp[esp.n_unidade >= 5].nlargest(20, "especializacao")
+                                [["tema_id", "tema", "n_unidade", "especializacao"]],
+                                "tema", "tema_id", "un_tema_esp", colunas=cfg, altura=460)
+        mac = esp.groupby("macro").n_unidade.sum().reset_index().sort_values("n_unidade")
+        st.plotly_chart(px.bar(mac, x="n_unidade", y="macro", orientation="h", height=520,
+                               labels={"n_unidade": "Documentos da unidade", "macro": ""}), width="stretch")
+        ui.aviso_tema_provisorio()
+    else:
+        ui.aviso_tema_provisorio()
+        esp = q("""
+            with base as (
+                select k.keyword_norm, any_value(lower(k.keyword_raw)) palavra, k.doc_uid,
+                       max(case when du.unidade_id = ? then 1 else 0 end) da_unidade
+                from documento_keyword k join documento d using (doc_uid)
+                left join documento_unidade du using (doc_uid)
+                where d.ano between ? and ? group by k.keyword_norm, k.doc_uid),
+            tot as (select count(distinct doc_uid) N, count(distinct case when da_unidade = 1 then doc_uid end) Nu from base)
+            select any_value(palavra) palavra, sum(da_unidade) n_unidade, count(*) n_embrapa,
+                   (sum(da_unidade) / any_value(Nu)) / (count(*) / any_value(N)) especializacao
+            from base, tot group by keyword_norm having sum(da_unidade) >= 3
+        """, (sel, a0, a1))
+        st.dataframe(esp.nlargest(30, "n_unidade")[["palavra", "n_unidade", "especializacao"]], hide_index=True,
+                     width="stretch")
 
 with t_prod:
     for tipo, rot in dados.TIPOS.items():

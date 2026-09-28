@@ -1,3 +1,4 @@
+import pandas as pd
 import streamlit as st
 
 from lib import dados, ui
@@ -96,6 +97,35 @@ elif d.tipo_doc == "publicacao":
         st.markdown("**Tecnologias que citam esta publicação**")
         ui.tabela_navegavel(lk, "doc", "doc_uid", "doc_link_b")
 
+if dados.tem_semantica():
+    tm = q("select tema_id, macro_id, score from doc_tema where doc_uid = ?", (param,))
+    if not tm.empty:
+        st.markdown(f"**Tema:** {dados.rotulo_tema(tm.tema_id[0])}  \n"
+                    f"**Macrotema:** {dados.rotulo_tema(tm.macro_id[0])}")
+        ui.link("tema", tm.tema_id[0], "Explorar este tema", ":material/category:")
+
 st.markdown("#### Documentos semelhantes")
-st.info("Projetos, publicações e tecnologias semanticamente relacionados a este documento aparecerão aqui "
-        "após a geração dos embeddings (fase 3 do pipeline).", icon=":material/hourglass_top:")
+if not dados.tem_semantica():
+    st.info("Disponível após a geração dos embeddings (camada semântica do pipeline).",
+            icon=":material/hourglass_top:")
+else:
+    st.caption("Os 10 documentos de cada tipo com conteúdo mais parecido com este (título, resumo e "
+               "palavras-chave), segundo o modelo de linguagem. Todos estão entre os 1–2% de pares mais "
+               "parecidos da base; o nível indica quão próximo é o conteúdo: **muito alta** (quase o mesmo "
+               "assunto), **alta**, **moderada** (assunto relacionado).")
+    sim = q("""select s.destino_uid doc_uid, s.tipo_destino, s.cos, s.rank, d.ano, d.titulo, d.unidade_id
+               from similaridade s join documento d on d.doc_uid = s.destino_uid
+               where s.origem_uid = ? order by s.tipo_destino, s.rank""", (param,))
+    sim["nivel"] = pd.cut(sim.cos, [-1, 0.25, 0.4, 0.6, 1.01],
+                          labels=["baixa", "moderada", "alta", "muito alta"]).astype(str)
+    sim["barra"] = (sim.cos.clip(0, 0.8) / 0.8 * 100).round(0)
+    abas = st.tabs([dados.TIPOS[t] for t in dados.TIPOS])
+    for aba, t in zip(abas, dados.TIPOS):
+        with aba:
+            sub = sim[sim.tipo_destino == t].copy()
+            sub["unidade"] = sub.unidade_id.map(dados.rotulo_unidade)
+            ui.tabela_navegavel(
+                sub[["doc_uid", "barra", "nivel", "ano", "titulo", "unidade"]], "doc", "doc_uid", f"doc_sim_{t}",
+                colunas={"barra": st.column_config.ProgressColumn("Semelhança", min_value=0, max_value=100,
+                                                                  format=" "),
+                         "nivel": "Nível", "titulo": "Título", "ano": "Ano", "unidade": "Unidade"})

@@ -35,7 +35,12 @@ TABELAS_APP <- list(
   doc_link = "*",
   pessoa = "pessoa_id, nome_exibicao, assinatura_principal, unidade_ref_id, n_obras, n_projetos_lider",
   doc_pessoa = "doc_uid, papel, ordem, rotulo_exibicao, nivel, pessoa_id",
-  publicacao = "doc_uid, obra_id, unidade_id, tipo, url_repositorio"
+  publicacao = "doc_uid, obra_id, unidade_id, tipo, url_repositorio",
+  # camada semântica (Python: pipeline/py/)
+  similaridade = "*",
+  proximidade_unidade = "*",
+  tema = "*",
+  doc_tema = "*"
 )
 
 construir_duckdb_app <- function(parquets, db_path) {

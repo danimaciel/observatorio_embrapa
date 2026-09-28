@@ -36,12 +36,24 @@ with e1.expander("Como ler esta página"):
                 "arraste para reorganizar; use a roda do mouse para zoom.\n\n"
                 "**Escolha uma unidade em foco** para ver com quem ela se relaciona, a síntese de cada relação e "
                 "os documentos que a sustentam.\n\n"
-                "Ainda não disponíveis: relações por **projetos** (a base não traz as equipes) e **proximidade "
-                "temática** (depende do modelo de temas; será mostrada separada da colaboração observada).")
+                "Em **Mostrar**, a *proximidade temática* compara o conteúdo da produção das unidades — "
+                "separada da colaboração observada. Ainda não disponível: relações por **projetos** "
+                "(a base não traz as equipes).")
 
 if not camadas:
     st.info("Escolha ao menos um tipo de relação.")
     st.stop()
+
+# Modo: colaboração observada × proximidade temática (mantidas separadas)
+if dados.tem_semantica():
+    modo = st.segmented_control(
+        "Mostrar", ["colab", "prox", "pot"], default="colab", key="redes_modo",
+        format_func={"colab": "Colaboração observada", "prox": "Proximidade temática",
+                     "pot": "Colaborações potenciais"}.get)
+    if modo in ("prox", "pot"):
+        from lib import proximidade
+        proximidade.mostrar(modo, foco, tuple(camadas), a0, a1)
+        st.stop()
 r = dados.rede_unidades(a0, a1, tuple(camadas))
 r = r[r.n_docs >= min_docs]
 if r.empty:

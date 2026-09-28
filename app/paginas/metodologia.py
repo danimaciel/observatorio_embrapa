@@ -34,16 +34,28 @@ A afiliação do cadastro é a **atual**. Para não criar colaborações falsas 
 de um autor numa obra é a unidade depositante quando ela é unidade conhecida da pessoa; senão, a de referência.
 
 ### Relações entre unidades
-- **Coautoria em publicações**: unidades depositantes + unidades dos autores identificados.
-- **Tecnologias (indireta)**: a tecnologia de uma unidade cita publicação com participação de outra.
+- **Publicações em conjunto**: unidades depositantes + unidades dos autores identificados.
+- **Tecnologia que usa publicação de outra unidade**: a tecnologia de uma unidade cita publicação com
+  participação de outra.
 - **Intensidade**: contagem fracionária (cada documento distribui peso 1 entre seus pares).
-- **Força de associação**: razão entre a intensidade observada e a esperada pelo tamanho das unidades.
-- Ainda não disponíveis: **projetos** (a exportação traz só o líder, não a equipe) e **proximidade temática**
-  (depende do modelo de temas) — esta será mostrada separada da colaboração observada.
+- **Força de associação**: intensidade observada ÷ esperada pelo tamanho das unidades.
+- **Proximidade temática** (separada da colaboração): semelhança entre os perfis de conteúdo das unidades.
+  **Colaborações potenciais**: pares muito próximos em conteúdo que colaboram abaixo do esperado.
+- Ainda não disponível: relações por **projetos** (a exportação traz só o líder, não a equipe).
 
-### Temas
-Provisoriamente, palavras-chave declaradas. Na versão final: embeddings multilíngues (Sentence Transformers) e
-BERTopic em dois níveis (macrotema → tema), com rótulos revisados por especialistas.
+### Camada semântica
+- **Embeddings**: título + resumo/descrição + palavras-chave de cada projeto, publicação e tecnologia,
+  representados pelo modelo multilíngue `intfloat/multilingual-e5-base`. Escolhido numa avaliação com as
+  citações declaradas tecnologia → publicação: 87% das publicações citadas aparecem entre as 10 mais
+  parecidas num conjunto de 5,3 mil; 69% entre as 177 mil da base.
+- **Calibração**: remove-se o vetor médio de cada tipo de documento e idioma, para que projetos,
+  publicações e tecnologias — e textos em português e inglês — sobre o mesmo assunto se aproximem.
+- **Documentos semelhantes**: os 10 mais parecidos de cada tipo, por cosseno entre os vetores.
+- **Temas**: BERTopic (UMAP + HDBSCAN) ajustado numa amostra equilibrada entre os tipos; todos os
+  documentos são atribuídos ao tema de centro mais próximo; rótulos pelos termos mais característicos
+  (c-TF-IDF). Macrotemas: agrupamento hierárquico dos temas. Os rótulos são automáticos e podem ser
+  revisados por especialistas. O modelo é reajustado periodicamente (ex.: anual) para manter os temas
+  estáveis entre as atualizações mensais.
 
 ### Uso responsável
 Os indicadores descrevem a atividade de pesquisa; não devem ser usados como *ranking* de pessoas.

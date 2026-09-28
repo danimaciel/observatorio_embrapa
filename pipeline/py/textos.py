@@ -24,7 +24,23 @@ def carregar_textos() -> pd.DataFrame:
               ("Palavras-chave: " + doc.palavras_chave).where(doc.palavras_chave.notna(), "")]
     doc["texto"] = (partes[0] + ". " + partes[1] + " " + partes[2]).str.replace(r"\s+", " ", regex=True).str.strip()
     doc["texto_curto"] = doc.resumo.isna() | (doc.resumo.str.len() < 30)
+    # Versão para rotular temas (sem o prefixo "Palavras-chave:")
+    doc["texto_rotulo"] = (partes[0] + ". " + partes[1] + " " + doc.palavras_chave.fillna("")) \
+        .str.replace(r"\s+", " ", regex=True).str.strip()
+    doc["idioma"] = detectar_idioma(doc.texto)
     return doc
+
+
+_PT = set("de da do dos das para com em na no nas nos que e os as um uma foi são pelo pela".split())
+_EN = set("the of and in to for with on is are from was were by this that".split())
+
+
+def detectar_idioma(textos: pd.Series) -> pd.Series:
+    """'en' ou 'pt' pela frequência de palavras funcionais (suficiente para calibrar os vetores)."""
+    tok = textos.str.lower().str.findall(r"[a-zà-ú]+")
+    pt = tok.map(lambda t: sum(w in _PT for w in t))
+    en = tok.map(lambda t: sum(w in _EN for w in t))
+    return (en > pt).map({True: "en", False: "pt"})
 
 
 def gold_tecnologia_publicacao() -> pd.DataFrame:

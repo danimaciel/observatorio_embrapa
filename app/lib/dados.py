@@ -203,6 +203,46 @@ def palavras_chave(doc_uids: tuple[str, ...], n: int = 15) -> pd.DataFrame:
     """, (list(doc_uids), n))
 
 
+# Camada semântica (temas e similaridade) ------------------------------------------
+
+@st.cache_data(show_spinner=False)
+def tem_semantica() -> bool:
+    tabelas = set(q("select table_name from duckdb_tables()").table_name)
+    return {"tema", "doc_tema", "similaridade"} <= tabelas
+
+
+@st.cache_data(show_spinner=False)
+def temas() -> pd.DataFrame:
+    t = q("select * from tema")
+    t["n_total"] = t.n_projeto + t.n_publicacao + t.n_tecnologia
+    return t
+
+
+def rotulo_tema(tema_id: str) -> str:
+    t = temas().set_index("tema_id")
+    return t.rotulo.get(tema_id, tema_id)
+
+
+@st.cache_data(show_spinner=False)
+def temas_de_docs(doc_uids: tuple[str, ...], n: int = 5, nivel: str = "tema") -> pd.DataFrame:
+    """Temas mais frequentes num conjunto de documentos (nivel: 'tema' ou 'macro')."""
+    col = "tema_id" if nivel == "tema" else "macro_id"
+    r = q(f"""select {col} tema_id, count(*) n from doc_tema where list_contains(?, doc_uid)
+              group by 1 order by n desc limit ?""", (list(doc_uids), n))
+    r["rotulo"] = r.tema_id.map(rotulo_tema)
+    return r
+
+
+def resumo_temas(doc_uids, n: int = 3) -> str:
+    """Rótulos dos n temas mais frequentes (texto curto para tabelas)."""
+    if doc_uids is None or len(doc_uids) == 0:
+        return ""
+    if not tem_semantica():
+        kw = palavras_chave(tuple(doc_uids), n)
+        return ", ".join(kw.palavra)
+    return " · ".join(temas_de_docs(tuple(doc_uids), n).rotulo)
+
+
 @st.cache_data(show_spinner=False)
 def faixa_anos() -> tuple[int, int]:
     r = q("select min(ano) a0, max(ano) a1 from documento where ano >= 1970")

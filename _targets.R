@@ -93,7 +93,27 @@ list(
     doc_link = doc_link
   ), "data/processed"), format = "file"),
   tar_target(duckdb_file, construir_duckdb(parquets, "data/processed/observatorio.duckdb"), format = "file"),
-  tar_target(duckdb_app, construir_duckdb_app(parquets, "data/processed/observatorio_app.duckdb"),
+  # Fase 3–4 — camada semântica (Python) ---------------------------------------------
+  # Embeddings incrementais: só documentos novos ou alterados são calculados.
+  tar_target(embeddings, rodar_python(
+    "pipeline/py/embeddings.py",
+    saidas = c("data/interim/embeddings/e5-base.npy", "data/interim/embeddings/e5-base_ids.parquet"),
+    dep = parquets), format = "file"),
+  tar_target(semantica_similaridade, rodar_python(
+    "pipeline/py/similaridade.py",
+    saidas = c("data/processed/similaridade.parquet", "data/processed/proximidade_unidade.parquet"),
+    dep = embeddings), format = "file"),
+  tar_target(arq_ref_stopwords, "ref/stopwords_pt.txt", format = "file"),
+  tar_target(arq_ref_temas_rotulos, "ref/temas_rotulos.csv", format = "file"),
+  # Temas: atribuição aos temas salvos; reajuste só com
+  # `python pipeline/py/temas.py --reajustar` (ex.: anual).
+  tar_target(semantica_temas, rodar_python(
+    "pipeline/py/temas.py",
+    saidas = c("data/processed/tema.parquet", "data/processed/doc_tema.parquet"),
+    dep = list(embeddings, arq_ref_stopwords, arq_ref_temas_rotulos)), format = "file"),
+
+  tar_target(duckdb_app, construir_duckdb_app(c(parquets, semantica_similaridade, semantica_temas),
+                                              "data/processed/observatorio_app.duckdb"),
              format = "file"),
   tar_target(auditoria, amostra_auditoria(doc_pessoa, pessoa, publicacao, projeto,
                                           sprintf("relatorios/auditoria_identidade_%s.csv", EXPORTACAO)),
