@@ -40,8 +40,12 @@ with st.sidebar:
               help="Projetos pelo ano de início; publicações e tecnologias pelo ano.")
     m = dados.meta()
     st.caption(f"Dados: exportação {m['exportacao']} · processados em {m['gerado_em']}")
-    if m.get("arquivos_truncados"):
-        st.warning(f"Base incompleta ({m['arquivos_truncados']}): arquivo truncado na exportação. "
-                   "Números provisórios.", icon=":material/warning:")
+    if "publicacoes" in (m.get("arquivos_truncados") or ""):
+        n_pub = dados.q("select count(*) n from publicacao").n[0]
+        n_fmt = f"{n_pub:,}".replace(",", ".")
+        st.warning(f"**Base de publicações incompleta.** O arquivo recebido foi cortado no meio da cópia: "
+                   f"foram lidos {n_fmt} registros, quase todos até 2009. Publicações e as colaborações "
+                   "derivadas delas estão subestimadas; projetos e tecnologias estão completos.",
+                   icon=":material/warning:")
 
 pg.run()

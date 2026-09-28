@@ -1,4 +1,6 @@
+import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
 
 from lib import dados, ui
@@ -50,17 +52,52 @@ with t2:
     st.plotly_chart(fig, width="stretch")
 
 with t3:
+    st.markdown("#### Colaboração entre unidades nas publicações")
+    st.caption("Uma obra é colaborativa quando envolve 2 ou mais unidades: unidades depositantes + unidade dos "
+               "autores Embrapa identificados (na época da obra). Detalhes em Metodologia.")
     s = q("""
         with u as (select doc_uid, count(distinct unidade_id) k from documento_unidade
                    where papel in ('depositante','afiliacao_autor') group by 1)
-        select d.ano, avg(case when k > 1 then 100.0 else 0 end) pct, count(*) n
+        select d.ano, count(*) obras, sum(case when k > 1 then 1 else 0 end) colaborativas
         from u join documento d using (doc_uid) where d.ano between ? and ? group by 1 order by 1
     """, (a0, a1))
-    fig = px.line(s, x="ano", y="pct", markers=True, hover_data=["n"],
-                  labels={"ano": "Ano", "pct": "% de obras com ≥ 2 unidades", "n": "Obras"})
+    s["pct"] = (100 * s.colaborativas / s.obras).where(s.obras >= 30)
+    fig = go.Figure()
+    fig.add_bar(x=s.ano, y=s.colaborativas, name="Obras colaborativas", marker_color=dados.CORES_TIPO["publicacao"])
+    fig.add_scatter(x=s.ano, y=s.pct, name="% das obras do ano", yaxis="y2", mode="lines+markers",
+                    line_color="#EF6C00", connectgaps=False)
+    fig.update_layout(yaxis=dict(title="Obras com ≥ 2 unidades"),
+                      yaxis2=dict(title="% das obras", overlaying="y", side="right", rangemode="tozero"),
+                      legend=dict(orientation="h", y=1.12), margin=dict(t=40))
     st.plotly_chart(fig, width="stretch")
-    st.caption("Unidades de uma obra = unidades depositantes + unidade dos autores Embrapa identificados "
-               "(na época da obra). Detalhes em Metodologia.")
+    st.caption("O percentual só é mostrado em anos com pelo menos 30 obras, para evitar distorções "
+               "em anos com pouca produção registrada.")
+
+    r = dados.rede_unidades(a0, a1, ("publicacoes",))
+    if not r.empty:
+        forca_un = pd.concat([r[["unidade1", "peso"]].rename(columns={"unidade1": "u"}),
+                              r[["unidade2", "peso"]].rename(columns={"unidade2": "u"})]).groupby("u").peso.sum()
+        n_top = st.slider("Unidades na matriz", 10, len(forca_un), min(20, len(forca_un)))
+        top = forca_un.nlargest(n_top).index.tolist()
+        rr = r[r.unidade1.isin(top) & r.unidade2.isin(top)]
+        m = pd.concat([rr, rr.rename(columns={"unidade1": "unidade2", "unidade2": "unidade1"})])             .pivot_table(index="unidade1", columns="unidade2", values="n_docs", aggfunc="sum")             .reindex(index=top, columns=top)
+        rot = [dados.rotulo_unidade(u) for u in top]
+        fig = px.imshow(m.values, x=rot, y=rot, color_continuous_scale="Blues", aspect="auto",
+                        labels={"color": "Obras em comum"})
+        fig.update_layout(height=250 + 22 * n_top, xaxis_tickangle=-45)
+        st.markdown("**Matriz de colaboração** — obras em comum entre as unidades mais colaborativas")
+        st.plotly_chart(fig, width="stretch")
+
+        st.markdown("**Pares de unidades que mais colaboram**")
+        pares = r.sort_values("n_docs", ascending=False).head(40).assign(
+            unidade_a=lambda d: d.unidade1.map(dados.rotulo_unidade),
+            unidade_b=lambda d: d.unidade2.map(dados.rotulo_unidade))
+        ui.tabela_navegavel(
+            pares[["unidade1", "unidade_a", "unidade_b", "n_docs", "peso", "forca"]], "unidade", "unidade1",
+            "emb_pares", altura=400,
+            colunas={"n_docs": "Obras em comum",
+                     "peso": st.column_config.NumberColumn("Intensidade", format="%.1f"),
+                     "forca": st.column_config.NumberColumn("Força de associação", format="%.2f")})
 
 with t4:
     s = q("""
