@@ -29,6 +29,34 @@ Metodologia. Links diretos: `/unidades?unidade=solos`, `/pesquisadores?pessoa=PE
 
 Temas e similaridade semântica ainda usam palavras-chave como aproximação (fases 3–4 pendentes).
 
+## Publicação (Streamlit Community Cloud)
+
+O código é público; o banco do app fica numa Release do repositório **privado**
+`danimaciel/observatorio_embrapa_dados` e é baixado quando o app inicia.
+
+1. **Token de leitura** (uma vez): GitHub → Settings → Developer settings → *Fine-grained tokens* →
+   acesso **apenas** ao repositório `observatorio_embrapa_dados`, permissão *Contents: Read-only*.
+2. **Criar o app** em share.streamlit.io: repositório `danimaciel/observatorio_embrapa`, branch `main`,
+   arquivo principal `app/app.py`, Python 3.12.
+3. **Secrets** (Advanced settings → Secrets):
+   ```toml
+   [dados]
+   repo = "danimaciel/observatorio_embrapa_dados"
+   tag = "dados-2026-09"
+   arquivo = "observatorio_app.duckdb"
+   token = "<token do passo 1>"
+   ```
+
+**Atualizar os dados** (nova exportação ou revisão de identidade): rodar `targets::tar_make()`, publicar o banco
+numa nova Release e trocar `tag` nos secrets (o app reinicia e baixa a nova versão):
+
+```bash
+gh release create dados-AAAA-MM data/processed/observatorio_app.duckdb --repo danimaciel/observatorio_embrapa_dados --title "Dados AAAA-MM"
+```
+
+O banco publicado (`observatorio_app.duckdb`) contém só o que o app usa: não inclui matrícula, situação
+funcional nem a base de autores.
+
 ## Revisão de identidade
 
 `relatorios/revisao_identidade_<AAAA-MM>.csv` agrupa as menções ambíguas por assinatura + unidade, ordenadas
