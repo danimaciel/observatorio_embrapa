@@ -25,6 +25,7 @@ construir_duckdb <- function(parquets, db_path) {
 TABELAS_APP <- list(
   meta = "*",
   unidade = "*",
+  unidade_localizacao = "unidade_id, municipio, uf, lat, lon",
   documento = "*",
   documento_unidade = "*",
   documento_pessoa = "*",

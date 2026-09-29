@@ -23,6 +23,7 @@ list(
   tar_target(arq_ref_alias, "ref/unidade_alias.csv", format = "file"),
   tar_target(arq_ref_tipo_pub, "ref/tipo_publicacao.csv", format = "file"),
   tar_target(arq_ref_overrides, "ref/overrides_identidade.csv", format = "file"),
+  tar_target(arq_ref_localizacao, "ref/unidade_localizacao.csv", format = "file"),
 
   # Fase 1 — ingestão ------------------------------------------------------------
   tar_target(raw_projetos, ler_csv_exportacao(arq_projetos, PERMITIR_TRUNCADO)),
@@ -33,6 +34,8 @@ list(
   tar_target(ref_alias, readr::read_csv(arq_ref_alias, col_types = readr::cols(.default = "c"))),
   tar_target(ref_tipo_pub, readr::read_csv(arq_ref_tipo_pub, col_types = readr::cols(.default = "c"))),
   tar_target(ref_overrides, readr::read_csv(arq_ref_overrides, col_types = readr::cols(.default = "c"))),
+  tar_target(unidade_localizacao, readr::read_csv(arq_ref_localizacao, show_col_types = FALSE,
+                                                  col_types = readr::cols(lat = "d", lon = "d", .default = "c"))),
 
   # Fase 1 — harmonização ----------------------------------------------------------
   tar_target(unidade_alias, montar_unidade_alias(ref_unidade, ref_alias)),
@@ -72,37 +75,43 @@ list(
   # Produtos -------------------------------------------------------------------------
   tar_target(parquets, salvar_parquet(list(
     meta = meta,
-    documento = documento,
-    documento_unidade = documento_unidade,
     documento_pessoa = documento_pessoa,
-    documento_keyword = documento_keyword,
     aresta_unidade = aresta_unidade,
     aresta_pessoa = aresta_pessoa,
     pessoa_tecnologia = pessoa_tecnologia,
     unidade = ref_unidade,
+    unidade_localizacao = unidade_localizacao,
     unidade_alias = dplyr::select(unidade_alias, alias, unidade_id, tipo),
     projeto = projeto,
-    publicacao = publicacao,
     obra = obra,
     tecnologia = tecnologia,
     pessoa = pessoa,
     autor_registro = pessoas$registro,
     doc_pessoa = doc_pessoa,
     doc_unidade = doc_unidade,
-    doc_keyword = doc_keyword,
+    doc_keyword = doc_keyword
+  ), "data/processed"), format = "file"),
+  # Tabelas lidas pelos passos em Python: separadas para que mudanças em outras
+  # tabelas não refaçam embeddings, similaridade e temas.
+  tar_target(parquets_semantica, salvar_parquet(list(
+    documento = documento,
+    documento_unidade = documento_unidade,
+    documento_keyword = documento_keyword,
+    publicacao = publicacao,
     doc_link = doc_link
   ), "data/processed"), format = "file"),
-  tar_target(duckdb_file, construir_duckdb(parquets, "data/processed/observatorio.duckdb"), format = "file"),
+  tar_target(duckdb_file, construir_duckdb(c(parquets, parquets_semantica), "data/processed/observatorio.duckdb"),
+             format = "file"),
   # Fase 3–4 — camada semântica (Python) ---------------------------------------------
   # Embeddings incrementais: só documentos novos ou alterados são calculados.
   tar_target(embeddings, rodar_python(
     "pipeline/py/embeddings.py",
     saidas = c("data/interim/embeddings/e5-base.npy", "data/interim/embeddings/e5-base_ids.parquet"),
-    dep = parquets), format = "file"),
+    dep = parquets_semantica), format = "file"),
   tar_target(semantica_similaridade, rodar_python(
     "pipeline/py/similaridade.py",
     saidas = c("data/processed/similaridade.parquet", "data/processed/proximidade_unidade.parquet"),
-    dep = embeddings), format = "file"),
+    dep = list(embeddings, parquets_semantica)), format = "file"),   # proximidade usa documento_unidade
   tar_target(arq_ref_stopwords, "ref/stopwords_pt.txt", format = "file"),
   tar_target(arq_ref_temas_rotulos, "ref/temas_rotulos.csv", format = "file"),
   # Temas: atribuição aos temas salvos; reajuste só com
@@ -112,7 +121,7 @@ list(
     saidas = c("data/processed/tema.parquet", "data/processed/doc_tema.parquet"),
     dep = list(embeddings, arq_ref_stopwords, arq_ref_temas_rotulos)), format = "file"),
 
-  tar_target(duckdb_app, construir_duckdb_app(c(parquets, semantica_similaridade, semantica_temas),
+  tar_target(duckdb_app, construir_duckdb_app(c(parquets, parquets_semantica, semantica_similaridade, semantica_temas),
                                               "data/processed/observatorio_app.duckdb"),
              format = "file"),
   tar_target(auditoria, amostra_auditoria(doc_pessoa, pessoa, publicacao, projeto,

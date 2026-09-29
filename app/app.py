@@ -16,6 +16,7 @@ paginas = {
                 url_path="embrapa", default=True),
         st.Page("paginas/unidades.py", title="Unidades", icon=":material/apartment:", url_path="unidades"),
         st.Page("paginas/redes.py", title="Redes", icon=":material/hub:", url_path="redes"),
+        st.Page("paginas/mapa.py", title="Mapa", icon=":material/map:", url_path="mapa"),
         st.Page("paginas/temas.py", title="Temas", icon=":material/category:", url_path="temas"),
     ],
     "Consulta": [
