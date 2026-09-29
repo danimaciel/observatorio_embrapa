@@ -30,3 +30,4 @@ __pycache__/
 # Documentação interna (somente local)
 documentacao/
 *.docx
+relatorios/piloto_municipios_amostra.csv

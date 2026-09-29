@@ -121,7 +121,17 @@ list(
     saidas = c("data/processed/tema.parquet", "data/processed/doc_tema.parquet"),
     dep = list(embeddings, arq_ref_stopwords, arq_ref_temas_rotulos)), format = "file"),
 
-  tar_target(duckdb_app, construir_duckdb_app(c(parquets, parquets_semantica, semantica_similaridade, semantica_temas),
+  # Municípios e estados citados nos textos (mapa territorial)
+  tar_target(arq_ref_municipios_ambiguos, "ref/municipios_ambiguos.txt", format = "file"),
+  tar_target(arq_geo, c("data/raw/geo/municipios_ibge.json", "data/raw/geo/br_municipios.geojson"), format = "file"),
+  tar_target(semantica_municipios, rodar_python(
+    "pipeline/py/municipios.py",
+    saidas = c("data/processed/doc_municipio.parquet", "data/processed/doc_estado.parquet",
+               "data/processed/municipio_centroide.parquet"),
+    dep = list(parquets_semantica, arq_ref_municipios_ambiguos, arq_geo)), format = "file"),
+
+  tar_target(duckdb_app, construir_duckdb_app(c(parquets, parquets_semantica, semantica_similaridade, semantica_temas,
+                                                semantica_municipios),
                                               "data/processed/observatorio_app.duckdb"),
              format = "file"),
   tar_target(auditoria, amostra_auditoria(doc_pessoa, pessoa, publicacao, projeto,

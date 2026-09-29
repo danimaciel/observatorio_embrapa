@@ -1,0 +1,51 @@
+# Nomes de município que, nos textos da Embrapa, costumam significar outra coisa
+# (cultivar, espécie, termo técnico). Só contam com a UF ao lado ("Pérola, PR").
+# Um por linha; acentos são ignorados na comparação.
+Pérola
+Ananás
+Theobroma
+Araucária
+Bebedouro
+Serra
+Peixe
+Barreiras
+Cristalina
+Formosa
+Bonito
+Colorado
+Vitória
+Salvador
+Natal
+Esperança
+Planalto
+Horizonte
+Cedro
+Jatobá
+Buriti
+Tucumã
+Pitanga
+Palmeira
+Canela
+Manga
+Floresta
+Cajueiro
+Pinhão
+Aroeiras
+Angelim
+Sapucaia
+Jequitibá
+Ipê
+Alegre
+Amparo
+Paraíso
+Fronteira
+Cruzeiro
+Colina
+Acari
+Cordeiro
+Morada Nova
+Santa Inês
+Formiga
+Butiá
+Mariana
+Pinheiro

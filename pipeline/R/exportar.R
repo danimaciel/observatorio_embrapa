@@ -41,7 +41,12 @@ TABELAS_APP <- list(
   similaridade = "*",
   proximidade_unidade = "*",
   tema = "*",
-  doc_tema = "*"
+  doc_tema = "*",
+  # territorial: só menções de confiança alta ou média entram no app
+  doc_municipio = list(colunas = "doc_uid, cod_ibge, municipio, uf, confianca",
+                       filtro = "confianca IN ('alta', 'media')"),
+  doc_estado = "*",
+  municipio_centroide = "*"
 )
 
 construir_duckdb_app <- function(parquets, db_path) {
@@ -50,8 +55,11 @@ construir_duckdb_app <- function(parquets, db_path) {
   con <- DBI::dbConnect(duckdb::duckdb(), db_path)
   on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
   for (nm in names(TABELAS_APP)) {
-    DBI::dbExecute(con, sprintf("CREATE TABLE %s AS SELECT %s FROM read_parquet('%s')",
-                                nm, TABELAS_APP[[nm]], normalizePath(por_nome[[nm]], winslash = "/")))
+    def <- TABELAS_APP[[nm]]
+    colunas <- if (is.list(def)) def$colunas else def
+    filtro <- if (is.list(def) && !is.null(def$filtro)) paste(" WHERE", def$filtro) else ""
+    DBI::dbExecute(con, sprintf("CREATE TABLE %s AS SELECT %s FROM read_parquet('%s')%s",
+                                nm, colunas, normalizePath(por_nome[[nm]], winslash = "/"), filtro))
   }
   DBI::dbExecute(con, "CHECKPOINT")
   db_path
