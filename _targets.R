@@ -130,8 +130,17 @@ list(
                "data/processed/municipio_centroide.parquet"),
     dep = list(parquets_semantica, arq_ref_municipios_ambiguos, arq_geo)), format = "file"),
 
+  # Biomas: declarados nas tecnologias + bioma predominante dos municípios citados
+  tar_target(arq_biomas, "data/raw/geo/biomas_2019_simplificado.gpkg", format = "file"),
+  tar_target(bioma_mun, bioma_municipio(arq_biomas, arq_geo[grepl("br_municipios", arq_geo)])),
+  tar_target(parquets_biomas, salvar_parquet(list(
+    doc_bioma = montar_doc_bioma(tecnologia, semantica_municipios[grepl("doc_municipio", semantica_municipios)],
+                                 bioma_mun)
+  ), "data/processed"), format = "file"),
+  tar_target(geo_biomas_app, exportar_geo_biomas(arq_biomas, "app/assets/br_biomas.geojson"), format = "file"),
+
   tar_target(duckdb_app, construir_duckdb_app(c(parquets, parquets_semantica, semantica_similaridade, semantica_temas,
-                                                semantica_municipios),
+                                                semantica_municipios, parquets_biomas),
                                               "data/processed/observatorio_app.duckdb"),
              format = "file"),
   tar_target(auditoria, amostra_auditoria(doc_pessoa, pessoa, publicacao, projeto,

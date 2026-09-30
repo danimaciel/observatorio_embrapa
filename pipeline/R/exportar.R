@@ -46,7 +46,8 @@ TABELAS_APP <- list(
   doc_municipio = list(colunas = "doc_uid, cod_ibge, municipio, uf, confianca",
                        filtro = "confianca IN ('alta', 'media')"),
   doc_estado = "*",
-  municipio_centroide = "*"
+  municipio_centroide = "*",
+  doc_bioma = "*"
 )
 
 construir_duckdb_app <- function(parquets, db_path) {

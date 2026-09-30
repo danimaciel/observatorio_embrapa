@@ -18,12 +18,16 @@ a0, a1 = dados.periodo()
 st.title("Mapa da produção")
 st.caption(f"Produção e temas no território · {a0}–{a1}")
 
-tem_territorio = "doc_municipio" in set(q("select table_name from duckdb_tables()").table_name)
+tabelas = set(q("select table_name from duckdb_tables()").table_name)
+visoes = {"sede": "Sedes das unidades"}
+if "doc_municipio" in tabelas:
+    visoes["territorio"] = "Onde a pesquisa acontece"
+if "doc_bioma" in tabelas:
+    visoes["bioma"] = "Biomas"
 visao = "sede"
-if tem_territorio:
-    visao = st.segmented_control("Mostrar", ["sede", "territorio"], default="sede", key="mapa_visao",
-                                 format_func={"sede": "Sedes das unidades",
-                                              "territorio": "Onde a pesquisa acontece"}.get)
+if len(visoes) > 1:
+    visao = st.segmented_control("Mostrar", list(visoes), default="sede", key="mapa_visao",
+                                 format_func=visoes.get) or "sede"
 
 # Filtros comuns -------------------------------------------------------------------
 c1, c2, c3 = st.columns([2, 2, 2])
@@ -242,7 +246,109 @@ def mapa_territorio() -> None:
     ui.tabela_navegavel(docs.drop(columns="unidade_id"), "doc", "doc_uid", f"mapa_docs_{escala}", altura=380)
 
 
+# ==================================================================================
+@st.cache_data(show_spinner=False)
+def geo_biomas() -> dict:
+    return json.loads((Path(__file__).resolve().parents[1] / "assets" / "br_biomas.geojson").read_text(encoding="utf-8"))
+
+
+def mapa_biomas() -> None:
+    un = dados.unidades()
+    with c3:
+        fonte = st.radio("Origem do bioma", ["declarado", "municipio_citado"], horizontal=True,
+                         format_func={"declarado": "Declarado (tecnologias)",
+                                      "municipio_citado": "Municípios citados"}.get,
+                         help="**Declarado**: campo *Bioma* do cadastro de tecnologias. **Municípios citados**: "
+                              "bioma predominante (maior área) dos municípios citados no texto de projetos, "
+                              "publicações e tecnologias.")
+        unidade = st.selectbox("Produção da unidade", un.unidade_id.tolist(), index=None, key="bioma_un",
+                               format_func=dados.nome_unidade, placeholder="Todas as unidades")
+    tipos_b = list(tipos)
+    if fonte == "declarado":
+        st.info("O cadastro de tecnologias informa em que **biomas** cada tecnologia se aplica. Uma tecnologia "
+                "pode valer para vários, e cerca de um quarto delas é indicada para **todos os seis** — por padrão "
+                "essas ficam de fora, para o mapa mostrar as tecnologias voltadas a biomas específicos.",
+                icon=":material/forest:")
+        incluir_todos = st.toggle("Incluir tecnologias indicadas para todos os biomas", value=False)
+        if "tecnologia" not in tipos:
+            st.info("O bioma declarado só existe para tecnologias: inclua *Tecnologias* nos filtros de produção.")
+            return
+        tipos_b = ["tecnologia"]
+    else:
+        st.info("Cada município citado nos textos (ver *Onde a pesquisa acontece*) recebe o **bioma predominante** "
+                "no seu território (maior área, contornos IBGE 2019). Um documento conta uma vez por bioma.",
+                icon=":material/forest:")
+        incluir_todos = True
+    join_un = "join documento_unidade du using (doc_uid)" if unidade else ""
+    filtro_un = "and du.unidade_id = ?" if unidade else ""
+    base_where = f"""b.fonte = ? and (? or b.n_biomas < 6) and d.ano between ? and ?
+                     and list_contains(?, d.tipo_doc) {filtro_tema} {filtro_un}"""
+    params = (fonte, incluir_todos, a0, a1, tipos_b) + params_tema + ((unidade,) if unidade else ())
+    b = q(f"""select b.bioma, count(distinct b.doc_uid) documentos
+              from doc_bioma b join documento d using (doc_uid) {join_tema} {join_un}
+              where {base_where} group by b.bioma""", params)
+    if b.empty:
+        st.info("Nenhum documento com bioma para esses filtros.")
+        return
+    tot = int(q(f"""select count(distinct b.doc_uid) n from doc_bioma b join documento d using (doc_uid)
+                    {join_tema} {join_un} where {base_where}""", params).n.iloc[0])
+    b["pct"] = 100 * b.documentos / tot
+
+    col_mapa, col_barra = st.columns([3, 2])
+    with col_mapa:
+        fig = px.choropleth_map(b, geojson=geo_biomas(), locations="bioma", featureidkey="properties.bioma",
+                                color="documentos", color_continuous_scale="Greens", hover_name="bioma",
+                                range_color=(0, b.documentos.max()),
+                                hover_data={"bioma": False, "documentos": True, "pct": ":.1f"},
+                                labels={"documentos": "Documentos", "pct": "% dos documentos"},
+                                zoom=2.8, center={"lat": -14.5, "lon": -53}, height=600,
+                                map_style="carto-positron", opacity=0.8)
+        if unidade:
+            sede = q("select * from unidade_localizacao where unidade_id = ?", (unidade,))
+            if not sede.empty:
+                fig.add_trace(go.Scattermap(lat=sede.lat, lon=sede.lon, mode="markers", name="Sede",
+                                            marker=dict(size=14, color="#C62828"), hoverinfo="text",
+                                            hovertext=[f"Sede: {dados.nome_unidade(unidade)}"]))
+        fig.update_layout(margin=dict(t=0, l=0, r=0, b=0), showlegend=False, coloraxis_showscale=False)
+        st.plotly_chart(fig, width="stretch")
+    with col_barra:
+        bs = b.sort_values("documentos")
+        fb = px.bar(bs, x="documentos", y="bioma", orientation="h", text=bs.pct.map(lambda v: f"{v:.0f}%"),
+                    color="documentos", color_continuous_scale="Greens",
+                    range_color=(0, bs.documentos.max()), labels={"documentos": "Documentos", "bioma": ""}, height=600)
+        fb.update_layout(showlegend=False, coloraxis_showscale=False, margin=dict(t=10, l=0, r=10, b=0))
+        st.plotly_chart(fb, width="stretch")
+    st.caption(f"{tot:,} documentos com bioma. Os percentuais somam mais de 100% porque um documento pode se "
+               "referir a vários biomas. Contornos: IBGE 2019 (via geobr/IPEA).".replace(",", ".") +
+               (" Ponto vermelho = sede da unidade." if unidade else ""))
+
+    # Detalhe por bioma -------------------------------------------------------------
+    bioma = st.pills("Detalhar bioma", sorted(b.bioma), key=f"bioma_sel_{fonte}")
+    if not bioma:
+        st.caption("Escolha um bioma para ver as unidades e os documentos.")
+        return
+    t1, t2 = st.tabs(["Unidades", "Documentos"])
+    with t1:
+        u = q(f"""select du2.unidade_id, count(distinct b.doc_uid) documentos
+                  from doc_bioma b join documento d using (doc_uid) {join_tema} {join_un}
+                  join documento_unidade du2 on du2.doc_uid = b.doc_uid
+                  where b.bioma = ? and {base_where} group by 1 order by 2 desc""", (bioma,) + params)
+        u["unidade"] = u.unidade_id.map(dados.rotulo_unidade)
+        ui.tabela_navegavel(u[["unidade_id", "unidade", "documentos"]], "unidade", "unidade_id",
+                            f"bioma_un_{fonte}", altura=380, colunas={"unidade": "Unidade", "documentos": "Documentos"})
+    with t2:
+        docs = q(f"""select distinct d.doc_uid, d.tipo_doc tipo, d.ano, d.titulo, d.unidade_id
+                     from doc_bioma b join documento d using (doc_uid) {join_tema} {join_un}
+                     where b.bioma = ? and {base_where} order by d.ano desc""", (bioma,) + params)
+        docs["unidade"] = docs.unidade_id.map(dados.rotulo_unidade)
+        docs["tipo"] = docs.tipo.map({"projeto": "Projeto", "publicacao": "Publicação", "tecnologia": "Tecnologia"})
+        st.markdown(f"**{bioma}** — {len(docs)} documentos")
+        ui.tabela_navegavel(docs.drop(columns="unidade_id"), "doc", "doc_uid", f"bioma_docs_{fonte}", altura=380)
+
+
 if visao == "sede":
     mapa_sedes()
-else:
+elif visao == "territorio":
     mapa_territorio()
+else:
+    mapa_biomas()

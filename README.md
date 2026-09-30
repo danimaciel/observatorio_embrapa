@@ -5,7 +5,25 @@ Desenho completo: [docs/01-desenho-do-sistema.md](docs/01-desenho-do-sistema.md)
 
 ## Estado atual
 
-Implementadas as fases 1 (ingestão e harmonização) e 2 (resolução de identidade), em R com `{targets}`.
+Implementados: ingestão e harmonização, resolução de identidade, redes entre unidades e pessoas (R com
+`{targets}`); camada semântica — similaridade e temas (Python); camada territorial — municípios e estados
+citados nos textos e biomas; app Streamlit publicado.
+
+## Atualização mensal (roteiro)
+
+Tudo abaixo é incremental: só o que mudou é recalculado.
+
+1. `Rscript pipeline/baixar_dados.R AAAA-MM` — baixa as três exportações do Redape (e, numa instalação nova,
+   as malhas do IBGE e dos biomas).
+2. Copiar `AutorPessoalEmbrapa.xls` do mês para `data/raw/AAAA-MM/` (base interna).
+3. Trocar `EXPORTACAO` em `_targets.R` e rodar `targets::tar_make()` (no RStudio ou PowerShell; no Git Bash
+   o pacote `sf` pode falhar). O pipeline **para com mensagem clara** se um arquivo vier truncado, se faltar
+   coluna ou se aparecer unidade sem mapeamento (incluir em `ref/unidade_alias.csv`; unidade nova também
+   precisa de linha em `ref/unidade.csv` e `ref/unidade_localizacao.csv`).
+4. Conferir `relatorios/qualidade_AAAA-MM.md`.
+5. Publicar o banco (seção *Publicação*) e dar *Reboot* no app.
+
+Periodicamente (ex.: uma vez por ano): reajustar os temas (`temas.py --reajustar`) e revisar os rótulos.
 
 ## Como executar
 
@@ -47,11 +65,20 @@ pip install -r requirements.txt
 streamlit run app/app.py
 ```
 
-O app só lê `data/processed/observatorio.duckdb`: qualquer revisão (identidade, unidades) entra rodando o
-pipeline de novo, sem alterar o app. Páginas: Embrapa · Unidades · Redes · Temas · Pesquisadores · Documentos ·
-Metodologia. Links diretos: `/unidades?unidade=solos`, `/pesquisadores?pessoa=PE39798`, `/documentos?doc=OB:160215`.
+O app só lê `data/processed/observatorio_app.duckdb`: qualquer revisão (identidade, unidades) entra rodando o
+pipeline de novo, sem alterar o app. Páginas: Embrapa · Unidades · Redes · Mapa · Temas · Pesquisadores ·
+Documentos · Metodologia. Links diretos: `/unidades?unidade=solos`, `/pesquisadores?pessoa=PE39798`,
+`/documentos?doc=OB:160215`.
 
-Temas e similaridade semântica ainda usam palavras-chave como aproximação (fases 3–4 pendentes).
+## Camada territorial (página Mapa)
+
+- **Sedes das unidades**: coordenadas em `ref/unidade_localizacao.csv`.
+- **Onde a pesquisa acontece** (`pipeline/py/municipios.py`): municípios e estados citados em título, resumo e
+  palavras-chave, com nível de confiança pelo contexto (UF ao lado, "município de…", estado citado). O app usa
+  só confiança alta e média. Nomes que costumam ser outra coisa (cultivar, espécie) ficam em
+  `ref/municipios_ambiguos.txt`. Relatório: `relatorios/piloto_municipios.md`.
+- **Biomas** (`pipeline/R/biomas.R`): bioma declarado das tecnologias e bioma predominante (maior área) dos
+  municípios citados. Contornos IBGE 2019 via geobr/IPEA; `app/assets/br_biomas.geojson` é gerado pelo pipeline.
 
 ## Publicação (Streamlit Community Cloud)
 
@@ -102,6 +129,10 @@ todos os documentos daquela unidade; com `doc_uid`, só para aquele documento.
 | `unidade_alias.csv` | nomes antigos, grafias e siglas de unidades centrais → `unidade_id` |
 | `tipo_publicacao.csv` | tipo de publicação → grupo analítico |
 | `overrides_identidade.csv` | decisões manuais de identidade (`pessoa_id` ou `EXTERNO`), aplicadas a cada carga |
+| `unidade_localizacao.csv` | município e coordenadas da sede de cada unidade |
+| `municipios_ambiguos.txt` | nomes de município que só contam com a UF ao lado |
+| `stopwords_pt.txt` | palavras ignoradas nos rótulos automáticos dos temas |
+| `temas_rotulos.csv` | rótulos curados dos temas (`tema_id`, `rotulo`) |
 
 ## Conceitos principais
 

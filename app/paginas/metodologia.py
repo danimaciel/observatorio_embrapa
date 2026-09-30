@@ -57,6 +57,16 @@ de um autor numa obra é a unidade depositante quando ela é unidade conhecida d
   revisados por especialistas. O modelo é reajustado periodicamente (ex.: anual) para manter os temas
   estáveis entre as atualizações mensais.
 
+### Camada territorial
+- **Sedes**: coordenadas do campus-sede de cada unidade (Portal Embrapa).
+- **Onde a pesquisa acontece**: municípios citados em título, resumo e palavras-chave, confrontados com a lista
+  do IBGE. Só entram menções com contexto geográfico claro — UF ou estado ao lado ("Petrolina, PE"),
+  "município de…", ou o estado citado no mesmo texto (~98% de precisão numa amostra conferida). Nomes que
+  costumam ser outra coisa (cultivares, espécies, palavras comuns) exigem a UF ao lado.
+- **Biomas**: *declarado* — campo Bioma do cadastro de tecnologias; *municípios citados* — bioma predominante
+  (maior área) de cada município citado, pelos contornos IBGE 2019.
+- O mapa mostra onde a pesquisa é **mencionada**; documentos sem local no texto não aparecem.
+
 ### Uso responsável
 Os indicadores descrevem a atividade de pesquisa; não devem ser usados como *ranking* de pessoas.
 """)
