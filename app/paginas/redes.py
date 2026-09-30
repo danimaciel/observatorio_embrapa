@@ -11,7 +11,7 @@ st.title("Redes institucionais")
 st.caption(f"Nós = unidades · ligações = relações observadas entre elas · {a0}–{a1}")
 
 # Filtros ------------------------------------------------------------------------
-un = dados.unidades()
+un = dados.unidades().query("n_docs > 0")
 ids = un.unidade_id.tolist()
 c0, c1 = st.columns([2, 3])
 with c0:

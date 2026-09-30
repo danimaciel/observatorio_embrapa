@@ -1,45 +1,60 @@
 ﻿unidade_id,nome,municipio,uf,lat,lon,casou_ibge,fonte,validado
-acre,Embrapa Acre,Rio Branco,AC,-10.024451,-67.705053,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-agricultura_digital,Embrapa Agricultura Digital,Campinas,SP,-22.817625,-47.062133,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-agrobiologia,Embrapa Agrobiologia,Seropédica,RJ,-22.759728,-43.680883,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-agroenergia,Embrapa Agroenergia,Brasília,DF,-15.732591,-47.900038,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-agroindustria_tropical,Embrapa Agroindústria Tropical,Fortaleza,CE,-3.752753,-38.575647,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-agroindustria_alimentos,Embrapa Agroindústria de Alimentos,Rio de Janeiro,RJ,-23.00018,-43.58242,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-agropecuaria_oeste,Embrapa Agropecuária Oeste,Dourados,MS,-22.275244,-54.816967,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-agrossilvipastoril,Embrapa Agrossilvipastoril,Sinop,MT,-11.876123,-55.597413,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-algodao,Embrapa Algodão,Campina Grande,PB,-7.225861,-35.903948,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-alimentos_territorios,Embrapa Alimentos e Territórios,Maceió,AL,-9.661505,-35.740616,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-amapa,Embrapa Amapá,Macapá,AP,-0.011815,-51.082657,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-amazonia_ocidental,Embrapa Amazônia Ocidental,Manaus,AM,-2.893256,-59.972547,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-amazonia_oriental,Embrapa Amazônia Oriental,Belém,PA,-1.436139,-48.449175,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-arroz_feijao,Embrapa Arroz e Feijão,Santo Antônio de Goiás,GO,-16.505425,-49.281894,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-cafe,Embrapa Café,Brasília,DF,-15.731292,-47.898095,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-caprinos_ovinos,Embrapa Caprinos e Ovinos,Sobral,CE,-3.750272,-40.344011,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-cerrados,Embrapa Cerrados,Brasília,DF,-15.604642,-47.713592,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-clima_temperado,Embrapa Clima Temperado,Pelotas,RS,-31.680817,-52.439406,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-florestas,Embrapa Florestas,Colombo,PR,-25.321892,-49.158647,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-gado_corte,Embrapa Gado de Corte,Campo Grande,MS,-20.444717,-54.723372,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-gado_leite,Embrapa Gado de Leite,Juiz de Fora,MG,-21.783745,-43.370827,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-hortalicas,Embrapa Hortaliças,Brasília,DF,-15.932805,-48.143978,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-instrumentacao,Embrapa Instrumentação,São Carlos,SP,-22.012636,-47.896156,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-mandioca_fruticultura,Embrapa Mandioca e Fruticultura,Cruz das Almas,BA,-12.680116,-39.089187,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-maranhao,Embrapa Maranhão,São Luís,MA,-2.531042,-44.291078,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-meio_ambiente,Embrapa Meio Ambiente,Jaguariúna,SP,-22.732547,-47.018373,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-meio_norte,Embrapa Meio-Norte,Teresina,PI,-5.037197,-42.79925,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-milho_sorgo,Embrapa Milho e Sorgo,Sete Lagoas,MG,-19.448004,-44.167502,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-pantanal,Embrapa Pantanal,Corumbá,MS,-19.019294,-57.656581,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-pecuaria_sudeste,Embrapa Pecuária Sudeste,São Carlos,SP,-21.959328,-47.842342,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-pecuaria_sul,Embrapa Pecuária Sul,Bagé,RS,-31.349923,-54.016066,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-pesca_aquicultura,Embrapa Pesca e Aquicultura,Palmas,TO,-10.146256,-48.314992,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-recursos_geneticos,Embrapa Recursos Genéticos e Biotecnologia,Brasília,DF,-15.731192,-47.902858,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-rondonia,Embrapa Rondônia,Porto Velho,RO,-8.794313,-63.845587,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-roraima,Embrapa Roraima,Boa Vista,RR,2.757923,-60.731687,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-semiarido,Embrapa Semiárido,Petrolina,PE,-9.071771,-40.318646,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-soja,Embrapa Soja,Londrina,PR,-23.192471,-51.1833,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-solos,Embrapa Solos,Rio de Janeiro,RJ,-22.971174,-43.223506,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-suinos_aves,Embrapa Suínos e Aves,Concórdia,SC,-27.312099,-51.986019,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-tabuleiros_costeiros,Embrapa Tabuleiros Costeiros,Aracaju,SE,-10.950406,-37.052472,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-territorial,Embrapa Territorial,Campinas,SP,-22.880567,-47.090181,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-trigo,Embrapa Trigo,Passo Fundo,RS,-28.230365,-52.403953,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-uva_vinho,Embrapa Uva e Vinho,Bento Gonçalves,RS,-29.164708,-51.52591,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",
-sede,Embrapa Sede e unidades centrais,Brasília,DF,-15.7326,-47.9001,S,Endereço da Sede (PqEB); coordenada aproximada = PqEB,
+acre,Embrapa Acre,Rio Branco,AC,-10.024451,-67.705053,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+agricultura_digital,Embrapa Agricultura Digital,Campinas,SP,-22.817625,-47.062133,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+agrobiologia,Embrapa Agrobiologia,Seropédica,RJ,-22.759728,-43.680883,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+agroenergia,Embrapa Agroenergia,Brasília,DF,-15.732591,-47.900038,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+agroindustria_tropical,Embrapa Agroindústria Tropical,Fortaleza,CE,-3.752753,-38.575647,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+agroindustria_alimentos,Embrapa Agroindústria de Alimentos,Rio de Janeiro,RJ,-23.00018,-43.58242,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+agropecuaria_oeste,Embrapa Agropecuária Oeste,Dourados,MS,-22.275244,-54.816967,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+agrossilvipastoril,Embrapa Agrossilvipastoril,Sinop,MT,-11.876123,-55.597413,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+algodao,Embrapa Algodão,Campina Grande,PB,-7.225861,-35.903948,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+alimentos_territorios,Embrapa Alimentos e Territórios,Maceió,AL,-9.661505,-35.740616,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+amapa,Embrapa Amapá,Macapá,AP,-0.011815,-51.082657,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+amazonia_ocidental,Embrapa Amazônia Ocidental,Manaus,AM,-2.893256,-59.972547,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+amazonia_oriental,Embrapa Amazônia Oriental,Belém,PA,-1.436139,-48.449175,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+arroz_feijao,Embrapa Arroz e Feijão,Santo Antônio de Goiás,GO,-16.505425,-49.281894,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+cafe,Embrapa Café,Brasília,DF,-15.731292,-47.898095,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+caprinos_ovinos,Embrapa Caprinos e Ovinos,Sobral,CE,-3.750272,-40.344011,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+cerrados,Embrapa Cerrados,Brasília,DF,-15.604642,-47.713592,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+clima_temperado,Embrapa Clima Temperado,Pelotas,RS,-31.680817,-52.439406,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+florestas,Embrapa Florestas,Colombo,PR,-25.321892,-49.158647,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+gado_corte,Embrapa Gado de Corte,Campo Grande,MS,-20.444717,-54.723372,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+gado_leite,Embrapa Gado de Leite,Juiz de Fora,MG,-21.783745,-43.370827,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+hortalicas,Embrapa Hortaliças,Brasília,DF,-15.932805,-48.143978,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+instrumentacao,Embrapa Instrumentação,São Carlos,SP,-22.012636,-47.896156,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+mandioca_fruticultura,Embrapa Mandioca e Fruticultura,Cruz das Almas,BA,-12.680116,-39.089187,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+maranhao,Embrapa Maranhão,São Luís,MA,-2.531042,-44.291078,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+meio_ambiente,Embrapa Meio Ambiente,Jaguariúna,SP,-22.732547,-47.018373,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+meio_norte,Embrapa Meio-Norte,Teresina,PI,-5.037197,-42.79925,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+milho_sorgo,Embrapa Milho e Sorgo,Sete Lagoas,MG,-19.448004,-44.167502,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+pantanal,Embrapa Pantanal,Corumbá,MS,-19.019294,-57.656581,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+pecuaria_sudeste,Embrapa Pecuária Sudeste,São Carlos,SP,-21.959328,-47.842342,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+pecuaria_sul,Embrapa Pecuária Sul,Bagé,RS,-31.349923,-54.016066,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+pesca_aquicultura,Embrapa Pesca e Aquicultura,Palmas,TO,-10.146256,-48.314992,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+recursos_geneticos,Embrapa Recursos Genéticos e Biotecnologia,Brasília,DF,-15.731192,-47.902858,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+rondonia,Embrapa Rondônia,Porto Velho,RO,-8.794313,-63.845587,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+roraima,Embrapa Roraima,Boa Vista,RR,2.757923,-60.731687,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+semiarido,Embrapa Semiárido,Petrolina,PE,-9.071771,-40.318646,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+soja,Embrapa Soja,Londrina,PR,-23.192471,-51.1833,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+solos,Embrapa Solos,Rio de Janeiro,RJ,-22.971174,-43.223506,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+suinos_aves,Embrapa Suínos e Aves,Concórdia,SC,-27.312099,-51.986019,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+tabuleiros_costeiros,Embrapa Tabuleiros Costeiros,Aracaju,SE,-10.950406,-37.052472,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+territorial,Embrapa Territorial,Campinas,SP,-22.880567,-47.090181,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+trigo,Embrapa Trigo,Passo Fundo,RS,-28.230365,-52.403953,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+uva_vinho,Embrapa Uva e Vinho,Bento Gonçalves,RS,-29.164708,-51.52591,S,"Portal Embrapa — Embrapa no Brasil (coordenadas do mapa), 2026-09-29",S
+sede,Embrapa Sede e unidades centrais,Brasília,DF,-15.7326,-47.9001,S,Endereço da Sede (PqEB); coordenada aproximada = PqEB,S
+spm_brasilia,Escritório de Negócios de Brasília (Embrapa Produtos e Mercado),Brasília,DF,-15.783303,-47.794368,S,Município informado pela usuária em 2026-09-30; coordenada = centro do município (IBGE),S
+spm_campina_grande,Escritório de Negócios de Campina Grande (Embrapa Produtos e Mercado),Campina Grande,PB,-7.255567,-35.919759,S,Município informado pela usuária em 2026-09-30; coordenada = centro do município (IBGE),S
+spm_campinas,Escritório de Negócios de Campinas (Embrapa Produtos e Mercado),Campinas,SP,-22.898186,-47.047896,S,Município informado pela usuária em 2026-09-30; coordenada = centro do município (IBGE),S
+spm_canoinhas,Escritório de Negócios de Canoinhas (Embrapa Produtos e Mercado),Canoinhas,SC,-26.267595,-50.513784,S,Município informado pela usuária em 2026-09-30; coordenada = centro do município (IBGE),S
+spm_capao_do_leao,Escritório de Negócios de Capão do Leão (Embrapa Produtos e Mercado),Capão do Leão,RS,-31.855809,-52.540677,S,Município informado pela usuária em 2026-09-30; coordenada = centro do município (IBGE),S
+spm_dourados,Escritório de Negócios de Dourados (Embrapa Produtos e Mercado),Dourados,MS,-22.120437,-54.870007,S,Município informado pela usuária em 2026-09-30; coordenada = centro do município (IBGE),S
+spm_goiania,Escritório de Negócios de Goiânia (Embrapa Produtos e Mercado),Goiânia,GO,-16.652586,-49.254521,S,Município informado pela usuária em 2026-09-30; coordenada = centro do município (IBGE),S
+spm_imperatriz,Escritório de Negócios de Imperatriz (Embrapa Produtos e Mercado),Imperatriz,MA,-5.37004,-47.579513,S,Município informado pela usuária em 2026-09-30; coordenada = centro do município (IBGE),S
+spm_londrina,Escritório de Negócios de Londrina (Embrapa Produtos e Mercado),Londrina,PR,-23.479562,-51.123133,S,Município informado pela usuária em 2026-09-30; coordenada = centro do município (IBGE),S
+spm_passo_fundo,Escritório de Negócios de Passo Fundo (Embrapa Produtos e Mercado),Passo Fundo,RS,-28.28217,-52.426673,S,Município informado pela usuária em 2026-09-30; coordenada = centro do município (IBGE),S
+spm_petrolina,Escritório de Negócios de Petrolina (Embrapa Produtos e Mercado),Petrolina,PE,-9.103188,-40.561841,S,Município informado pela usuária em 2026-09-30; coordenada = centro do município (IBGE),S
+spm_ponta_grossa,Escritório de Negócios de Ponta Grossa (Embrapa Produtos e Mercado),Ponta Grossa,PR,-25.154251,-50.062524,S,Município informado pela usuária em 2026-09-30; coordenada = centro do município (IBGE),S
+spm_rondonopolis,Escritório de Negócios de Rondonópolis (Embrapa Produtos e Mercado),Rondonópolis,MT,-16.537355,-54.641823,S,Município informado pela usuária em 2026-09-30; coordenada = centro do município (IBGE),S
+spm_sete_lagoas,Escritório de Negócios de Sete Lagoas (Embrapa Produtos e Mercado),Sete Lagoas,MG,-19.443622,-44.259678,S,Município informado pela usuária em 2026-09-30; coordenada = centro do município (IBGE),S
+spm_uberlandia,Escritório de Negócios de Uberlândia (Embrapa Produtos e Mercado),Uberlândia,MG,-19.014269,-48.322163,S,Município informado pela usuária em 2026-09-30; coordenada = centro do município (IBGE),S

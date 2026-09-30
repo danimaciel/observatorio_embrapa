@@ -54,4 +54,4 @@ Nomes tratados como palavra comum (só valem com a UF ao lado): 237
 | Campinas               | SP   |          218 |
 | Cruz das Almas         | BA   |          210 |
 
-Amostra para conferência: relatorios/piloto_municipios_amostra.csv · 598s
+Amostra para conferência: relatorios/piloto_municipios_amostra.csv · 612s

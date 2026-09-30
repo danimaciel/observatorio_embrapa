@@ -42,4 +42,19 @@ tabuleiros_costeiros,Embrapa Tabuleiros Costeiros,CPATC,centro,SE,N,
 territorial,Embrapa Territorial,CNPM,centro,SP,N,antiga Embrapa Monitoramento por Satélite
 trigo,Embrapa Trigo,CNPT,centro,RS,N,
 uva_vinho,Embrapa Uva e Vinho,CNPUV,centro,RS,N,
-sede,Embrapa Sede e unidades centrais,SEDE,central,DF,N,"agrega diretorias, gerências, assessorias e escritórios (SPM/SCT)"
+sede,Embrapa Sede e unidades centrais,SEDE,central,DF,N,"agrega diretorias, gerências, assessorias e superintendências"
+spm_brasilia,Escritório de Negócios de Brasília (Embrapa Produtos e Mercado),SPM-Brasília,escritorio,DF,N,escritório da antiga Embrapa Produtos e Mercado (SPM)
+spm_campina_grande,Escritório de Negócios de Campina Grande (Embrapa Produtos e Mercado),SPM-Campina Grande,escritorio,PB,N,escritório da antiga Embrapa Produtos e Mercado (SPM)
+spm_campinas,Escritório de Negócios de Campinas (Embrapa Produtos e Mercado),SPM-Campinas,escritorio,SP,N,escritório da antiga Embrapa Produtos e Mercado (SPM)
+spm_canoinhas,Escritório de Negócios de Canoinhas (Embrapa Produtos e Mercado),SPM-Canoinhas,escritorio,SC,N,escritório da antiga Embrapa Produtos e Mercado (SPM)
+spm_capao_do_leao,Escritório de Negócios de Capão do Leão (Embrapa Produtos e Mercado),SPM-Capão do Leão,escritorio,RS,N,escritório da antiga Embrapa Produtos e Mercado (SPM)
+spm_dourados,Escritório de Negócios de Dourados (Embrapa Produtos e Mercado),SPM-Dourados,escritorio,MS,N,escritório da antiga Embrapa Produtos e Mercado (SPM)
+spm_goiania,Escritório de Negócios de Goiânia (Embrapa Produtos e Mercado),SPM-Goiânia,escritorio,GO,N,escritório da antiga Embrapa Produtos e Mercado (SPM)
+spm_imperatriz,Escritório de Negócios de Imperatriz (Embrapa Produtos e Mercado),SPM-Imperatriz,escritorio,MA,N,escritório da antiga Embrapa Produtos e Mercado (SPM)
+spm_londrina,Escritório de Negócios de Londrina (Embrapa Produtos e Mercado),SPM-Londrina,escritorio,PR,N,escritório da antiga Embrapa Produtos e Mercado (SPM)
+spm_passo_fundo,Escritório de Negócios de Passo Fundo (Embrapa Produtos e Mercado),SPM-Passo Fundo,escritorio,RS,N,escritório da antiga Embrapa Produtos e Mercado (SPM)
+spm_petrolina,Escritório de Negócios de Petrolina (Embrapa Produtos e Mercado),SPM-Petrolina,escritorio,PE,N,escritório da antiga Embrapa Produtos e Mercado (SPM)
+spm_ponta_grossa,Escritório de Negócios de Ponta Grossa (Embrapa Produtos e Mercado),SPM-Ponta Grossa,escritorio,PR,N,escritório da antiga Embrapa Produtos e Mercado (SPM)
+spm_rondonopolis,Escritório de Negócios de Rondonópolis (Embrapa Produtos e Mercado),SPM-Rondonópolis,escritorio,MT,N,escritório da antiga Embrapa Produtos e Mercado (SPM)
+spm_sete_lagoas,Escritório de Negócios de Sete Lagoas (Embrapa Produtos e Mercado),SPM-Sete Lagoas,escritorio,MG,N,escritório da antiga Embrapa Produtos e Mercado (SPM)
+spm_uberlandia,Escritório de Negócios de Uberlândia (Embrapa Produtos e Mercado),SPM-Uberlândia,escritorio,MG,N,escritório da antiga Embrapa Produtos e Mercado (SPM)

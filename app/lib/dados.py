@@ -143,7 +143,12 @@ def periodo() -> tuple[int, int]:
 
 @st.cache_data(show_spinner=False)
 def unidades() -> pd.DataFrame:
-    df = q("select unidade_id, nome_atual, sigla_historica, categoria, uf from unidade order by nome_atual")
+    # n_docs = 0: unidade sem produção registrada (ex.: escritórios que só aparecem na afiliação de pessoas);
+    # fica fora dos seletores, mas continua disponível para exibir nomes.
+    df = q("""select u.unidade_id, u.nome_atual, u.sigla_historica, u.categoria, u.uf,
+                     count(distinct du.doc_uid) n_docs
+              from unidade u left join documento_unidade du using (unidade_id)
+              group by all order by u.nome_atual""")
     df["rotulo"] = df["nome_atual"].str.replace("Embrapa ", "", regex=False)
     return df
 

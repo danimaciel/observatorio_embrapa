@@ -5,7 +5,7 @@ from lib import dados, ui
 from lib.dados import q
 
 a0, a1 = dados.periodo()
-un = dados.unidades()
+un = dados.unidades().query("n_docs > 0")
 ids = un.unidade_id.tolist()
 
 st.title("Unidades")
@@ -25,6 +25,9 @@ docs = q("""
 """, (sel, a0, a1))
 por_doc = docs.groupby(["doc_uid", "tipo_doc", "titulo", "ano", "categoria"], as_index=False)["papel"] \
     .agg(lambda p: ", ".join(sorted(set(p))))
+if por_doc.empty:
+    st.info("Sem documentos desta unidade no período escolhido.")
+    st.stop()
 cont = por_doc.tipo_doc.value_counts()
 pesq = q("""
     select count(distinct p.pessoa_id) n from pessoa p join documento_pessoa dp using (pessoa_id)

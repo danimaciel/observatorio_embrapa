@@ -1,5 +1,5 @@
 # Relatório de qualidade — exportação 2026-09
-Gerado em 2026-09-28 19:08.
+Gerado em 2026-09-30 07:25.
 
 ## Integridade dos arquivos
 - Todos os arquivos íntegros.

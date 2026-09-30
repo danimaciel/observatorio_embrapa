@@ -150,7 +150,7 @@ def geo_ufs() -> dict:
 
 
 def mapa_territorio() -> None:
-    un = dados.unidades()
+    un = dados.unidades().query("n_docs > 0")
     with c3:
         unidade = st.selectbox("Produção da unidade", un.unidade_id.tolist(), index=None,
                                format_func=dados.nome_unidade, placeholder="Todas as unidades",
@@ -253,7 +253,7 @@ def geo_biomas() -> dict:
 
 
 def mapa_biomas() -> None:
-    un = dados.unidades()
+    un = dados.unidades().query("n_docs > 0")
     with c3:
         fonte = st.radio("Origem do bioma", ["declarado", "municipio_citado"], horizontal=True,
                          format_func={"declarado": "Declarado (tecnologias)",
