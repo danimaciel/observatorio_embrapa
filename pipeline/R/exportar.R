@@ -47,7 +47,10 @@ TABELAS_APP <- list(
                        filtro = "confianca IN ('alta', 'media')"),
   doc_estado = "*",
   municipio_centroide = "*",
-  doc_bioma = "*"
+  doc_bioma = "*",
+  # programação: aderência semântica aos Desafios para Inovação
+  desafio = "*",
+  doc_desafio = "*"
 )
 
 construir_duckdb_app <- function(parquets, db_path) {

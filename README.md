@@ -70,6 +70,13 @@ pipeline de novo, sem alterar o app. Páginas: Embrapa · Unidades · Redes · M
 Documentos · Metodologia. Links diretos: `/unidades?unidade=solos`, `/pesquisadores?pessoa=PE39798`,
 `/documentos?doc=OB:160215`.
 
+## Programação (página Programação)
+
+`pipeline/py/programacao.py` compara cada documento desde 2024 aos 107 Desafios para Inovação
+(`ref/programacao_desafios.csv`: desafio → portfólio, objetivo, meta, ODS) por similaridade SBERT; guarda os 3
+mais aderentes com confiança alta/média/baixa. Amostra para conferência: `relatorios/programacao_amostra.csv`
+(coluna `correto`). Nova versão da programação: substituir o CSV e rodar o pipeline.
+
 ## Camada territorial (página Mapa)
 
 - **Sedes das unidades**: coordenadas em `ref/unidade_localizacao.csv`.
