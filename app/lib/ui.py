@@ -75,9 +75,8 @@ def link(destino: str, valor: str, rotulo: str, icone: str | None = None) -> Non
 def aviso_tema_provisorio() -> None:
     from lib import dados
     if dados.tem_semantica():
-        st.caption("Temas identificados automaticamente (BERTopic sobre embeddings multilíngues) a partir de "
-                   "título, resumo e palavras-chave. Os rótulos são os termos mais característicos de cada tema "
-                   "e podem ser revisados por especialistas.")
+        st.caption("Temas identificados por similaridade semântica (SBERT + BERTopic) a partir de título, resumo "
+                   "e palavras-chave; nomes dos temas revisados a partir dos termos mais característicos de cada um.")
     else:
         st.info("**Temas provisórios:** enquanto o modelo de temas não é gerado, os temas são aproximados "
                 "pelas palavras-chave declaradas nos documentos.", icon=":material/info:")

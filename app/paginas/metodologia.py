@@ -44,8 +44,9 @@ de um autor numa obra é a unidade depositante quando ela é unidade conhecida d
 - Ainda não disponível: relações por **projetos** (a exportação traz só o líder, não a equipe).
 
 ### Camada semântica
-- **Embeddings**: título + resumo/descrição + palavras-chave de cada projeto, publicação e tecnologia,
-  representados pelo modelo multilíngue `intfloat/multilingual-e5-base`. Escolhido numa avaliação com as
+- **Embeddings (SBERT)**: título + resumo/descrição + palavras-chave de cada projeto, publicação e tecnologia,
+  convertidos em vetores de sentença (*Sentence-BERT*, biblioteca `sentence-transformers`) pelo modelo
+  multilíngue `intfloat/multilingual-e5-base`: textos de conteúdo parecido ficam próximos (similaridade semântica). Escolhido numa avaliação com as
   citações declaradas tecnologia → publicação: 87% das publicações citadas aparecem entre as 10 mais
   parecidas num conjunto de 5,3 mil; 69% entre as 177 mil da base.
 - **Calibração**: remove-se o vetor médio de cada tipo de documento e idioma, para que projetos,
@@ -53,8 +54,9 @@ de um autor numa obra é a unidade depositante quando ela é unidade conhecida d
 - **Documentos semelhantes**: os 10 mais parecidos de cada tipo, por cosseno entre os vetores.
 - **Temas**: BERTopic (UMAP + HDBSCAN) ajustado numa amostra equilibrada entre os tipos; todos os
   documentos são atribuídos ao tema de centro mais próximo; rótulos pelos termos mais característicos
-  (c-TF-IDF). Macrotemas: agrupamento hierárquico dos temas. Os rótulos são automáticos e podem ser
-  revisados por especialistas. O modelo é reajustado periodicamente (ex.: anual) para manter os temas
+  (c-TF-IDF). Macrotemas: agrupamento hierárquico dos temas. Os nomes dos temas e macrotemas foram
+  redigidos a partir desses termos (`ref/temas_rotulos.csv`) e podem ser revisados por especialistas;
+  mudar um nome não altera a classificação. O modelo é reajustado periodicamente (ex.: anual) para manter os temas
   estáveis entre as atualizações mensais.
 
 ### Camada territorial

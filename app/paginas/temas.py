@@ -19,7 +19,8 @@ tm = dados.temas()
 tema_lista = tm[tm.nivel == 2].sort_values("n_total", ascending=False)
 macro_lista = tm[tm.nivel == 1].sort_values("n_total", ascending=False)
 st.caption(f"{len(tema_lista)} temas agrupados em {len(macro_lista)} macrotemas, identificados automaticamente "
-           "(BERTopic) a partir do conteúdo de projetos, publicações e tecnologias num espaço semântico comum. "
+           "por similaridade semântica (SBERT + BERTopic) a partir do conteúdo de projetos, publicações e tecnologias "
+           "num espaço semântico comum. "
            f"Período: {a0}–{a1}.")
 
 

@@ -1,1 +1,172 @@
 tema_id,rotulo
+M00,"Café, algodão, citros, cana e outras culturas"
+M01,"Fitossanidade: doenças, nematoides e plantas daninhas"
+M02,"Tecnologia de alimentos, bioprocessos e novos materiais"
+M03,Hortaliças
+M04,Solos e fertilidade
+M05,"Florestas plantadas, sementes e propagação de plantas"
+M06,"Agricultura familiar, sistemas integrados, florestas e clima"
+M07,"Geotecnologias, agrometeorologia e zoneamento"
+M08,"Gestão, formação e biotecnologia"
+M09,Recursos genéticos e fruteiras nativas
+M10,"Piscicultura, mandioca, pimentas e óleos essenciais"
+M11,Feijões
+M12,Microbiologia do solo e fixação biológica de nitrogênio
+M13,Arroz
+M14,Uva e vinho
+M15,Nutrição animal
+M16,"Grãos: milho, soja, sorgo e girassol"
+M17,Fruticultura
+M18,Pragas agrícolas
+M19,"Cadeias pecuárias: leite, corte, aves, suínos, caprinos e ovinos"
+M20,Sanidade animal
+M21,Pastagens e forrageiras
+M22,Reprodução e melhoramento genético animal
+M23,Trigo
+M24,Recursos hídricos e irrigação
+T000,Uva e vinho
+T001,Piscicultura e pesca
+T002,Café
+T003,"Gestão, inovação e informática"
+T004,Arroz: cultivares
+T005,Lagarta-do-cartucho e outras lagartas
+T006,Mandioca
+T007,"Agricultura familiar, transição agroecológica e desenvolvimento rural"
+T008,Banana
+T009,Soja: cultivares e sementes
+T010,Feijão-caupi
+T011,Carbono e qualidade física do solo
+T012,Pecuária de leite e de corte: cadeias produtivas
+T013,Feijão-comum: melhoramento
+T014,Citros
+T015,Milho: cultivares e melhoramento
+T016,Maracujá
+T017,Melão e melancia
+T018,"Capins Panicum (Tanzânia, Mombaça) e manejo do pastejo"
+T019,Óleos essenciais e plantas aromáticas
+T020,Integração lavoura-pecuária-floresta (ILPF)
+T021,Reprodução animal e inseminação
+T022,"Abelhas, apicultura e meliponicultura"
+T023,Sementes: germinação e dormência
+T024,Castanha-da-amazônia
+T025,Gado de corte: raças e desempenho
+T026,Controle biológico de doenças (Trichoderma)
+T027,Cana-de-açúcar
+T028,Algodão
+T029,Maçã
+T030,Florística e estrutura de florestas nativas
+T031,Seringueira
+T032,Feijão-comum: doenças
+T033,Plantas daninhas e herbicidas
+T034,Moscas-das-frutas
+T035,Carrapato bovino
+T036,Alimentação de ruminantes e digestibilidade
+T037,Doenças de caprinos e ovinos
+T038,Hortaliças: consumo e conservação
+T039,Brusone do arroz
+T040,Cebola e alho
+T041,Ferrugem-asiática da soja
+T042,Amendoim forrageiro
+T043,Sensoriamento remoto e índices de vegetação
+T044,Rizosfera e inoculantes
+T045,Bancos de germoplasma
+T046,Verminose de pequenos ruminantes
+T047,Trigo e triticale: cultivares
+T048,Manga: produção
+T049,Batata e batata-doce
+T050,"Palmito, pupunha e frutos amazônicos"
+T051,Abacaxi
+T052,Bioprocessos: hidrólise enzimática e biogás
+T053,Açaí
+T054,Geotecnologias e sistemas de informação geográfica
+T055,Caju
+T056,"Biomateriais: filmes, nanocelulose e compósitos"
+T057,Cupuaçu
+T058,Cultura de tecidos e micropropagação
+T059,Sorgo
+T060,Mastite
+T061,Guaraná
+T062,Serapilheira e fauna do solo
+T063,Tomate
+T064,Dendê (palma de óleo)
+T065,Doenças da videira
+T066,Captação de água de chuva e barragens subterrâneas
+T067,Manejo de pastagens e sementes forrageiras
+T068,Queijos e derivados lácteos
+T069,Sistemas agroflorestais
+T070,Nematoide-das-galhas
+T071,Gado leiteiro: Gir e Girolando
+T072,Silagem
+T073,Zoneamento agroecológico e aptidão agrícola
+T074,"Chuvas, clima e evapotranspiração"
+T075,Adubação fosfatada
+T076,Espécies nativas: nomenclatura e descrição
+T077,Genômica animal
+T078,Umbu
+T079,Espectroscopia e métodos analíticos
+T080,Gestão ambiental e planejamento institucional
+T081,Arroz: manejo e adubação
+T082,Agrotóxicos no ambiente
+T083,Enraizamento de estacas
+T084,Carcaça e terminação de animais
+T085,Bioinformática e genômica
+T086,Caprinos e ovinos
+T087,Iniciação científica e formação
+T088,Consórcio milho-braquiária e milho safrinha
+T089,Girassol
+T090,Uso e cobertura da terra
+T091,"Química do solo, calagem e plantas de cobertura"
+T092,Farinhas e panificação
+T093,Feijão-comum: cultivares
+T094,Andropogon e forrageiras do Cerrado
+T095,Adubos verdes e compostagem
+T096,Gênese e mineralogia de solos
+T097,Fungos micorrízicos
+T098,Agrometeorologia e monitoramento
+T099,Manejo florestal
+T100,Ácaros
+T101,Eucalipto
+T102,Bacias hidrográficas
+T103,Mosca-branca
+T104,Erva-mate
+T105,Manga: doenças
+T106,Avicultura e suinocultura
+T107,Paspalum
+T108,Feijão-comum: manejo e adubação
+T109,Frangos e suínos: nutrição
+T110,Acerola
+T111,Cigarrinhas
+T112,Nanotecnologia
+T113,Pinhão-manso
+T114,"Calagem, gessagem e remineralizadores"
+T115,Emissões de gases de efeito estufa
+T116,Compostos bioativos e antioxidantes
+T117,Coqueiro
+T118,Tolerância à seca
+T119,Pimentas e pimenta-do-reino
+T120,Braquiárias: melhoramento e apomixia
+T121,Alface
+T122,"Consumo alimentar, metano e eficiência"
+T123,Lodo de esgoto e metais pesados
+T124,Adubação nitrogenada
+T125,Inteligência artificial e visão computacional
+T126,Biossegurança e transgênicos
+T127,Mamão
+T128,Pínus
+T129,Pêssego e amora-preta
+T130,"Florestas tropicais, desmatamento e LiDAR"
+T131,Serviços ecossistêmicos
+T132,Abóbora
+T133,Trópico Semiárido: pesquisa e mecanização
+T134,Terra preta de índio
+T135,"Doenças do trigo (giberela, brusone)"
+T136,Evapotranspiração por satélite
+T137,Irrigação
+T138,Rizóbios e fixação biológica de nitrogênio
+T139,Viroses de plantas
+T140,Microbiologia do solo e coleções de microrganismos
+T141,Cenoura
+T142,Tolerância ao alumínio
+T143,Levantamento e classificação de solos
+T144,Suplementação mineral
+T145,Nematoides das lesões e de cisto
