@@ -119,6 +119,16 @@ st.subheader("Temas em destaque")
 if dados.tem_semantica():
     tm = dados.temas()
     macros = tm[tm.nivel == 1].sort_values("n_total", ascending=False)
+    # clique numa barra (visão geral) escolhe o macrotema daquele tema; tratado antes de desenhar o seletor
+    chave_fig = f"emb_temas_fig_{st.session_state.get('emb_fig_n', 0)}"
+    ev = st.session_state.get(chave_fig)
+    if ev and ev.selection.points:
+        rot = ev.selection.points[0].get("y")
+        pai = tm[(tm.nivel == 2) & (tm.rotulo == rot)].pai_id
+        if len(pai):
+            st.session_state["emb_macro"] = pai.iloc[0]
+        st.session_state["emb_fig_n"] = st.session_state.get("emb_fig_n", 0) + 1   # limpa a seleção
+        chave_fig = f"emb_temas_fig_{st.session_state['emb_fig_n']}"
     macro_sel = st.selectbox("Macrotema", macros.tema_id.tolist(), index=None, format_func=dados.rotulo_tema,
                              placeholder="Todos — os 20 temas com mais documentos", key="emb_macro")
     filtro = "and t.macro_id = ?" if macro_sel else ""
@@ -133,10 +143,15 @@ if dados.tem_semantica():
                  category_orders={"tema": k.tema.tolist()},
                  labels={"n": "Documentos", "tema": "", "macro": "Macrotema"})
     # clicar na legenda não esconde barras (a escolha do macrotema é pelo seletor acima)
-    fig.update_layout(legend=dict(itemclick=False, itemdoubleclick=False), showlegend=not macro_sel)
-    st.plotly_chart(fig, width="stretch")
-    st.caption("Todos os temas do macrotema escolhido." if macro_sel else
-               "Os 20 temas com mais documentos no período; escolha um macrotema para ver todos os seus temas.")
+    fig.update_layout(legend=dict(itemclick=False, itemdoubleclick=False, orientation="h", yanchor="top", y=-0.12,
+                                  xanchor="left", x=0, title_text=""),
+                      showlegend=not macro_sel, margin=dict(l=0, r=10, t=10))
+    if not macro_sel:
+        fig.update_layout(height=620 + 22 * ((k.macro.nunique() + 1) // 2))   # espaço para a legenda embaixo
+    st.plotly_chart(fig, width="stretch", key=chave_fig, on_select="rerun", selection_mode="points")
+    st.caption("Todos os temas do macrotema escolhido. Para voltar à visão geral, limpe o seletor (×)." if macro_sel
+               else "Os 20 temas com mais documentos no período. **Clique numa barra** (ou use o seletor) para ver "
+                    "todos os temas do macrotema dela.")
     ui.tabela_navegavel(k[["tema_id", "tema", "macro", "n"]], "tema", "tema_id", "emb_temas", altura=300,
                         colunas={"tema": "Tema", "macro": "Macrotema", "n": "Documentos"})
     ui.aviso_tema_provisorio()
