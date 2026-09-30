@@ -117,12 +117,26 @@ with t4:
 
 st.subheader("Temas em destaque")
 if dados.tem_semantica():
-    k = q("""select t.tema_id, count(*) n from doc_tema t join documento d using (doc_uid)
-             where d.ano between ? and ? group by 1 order by n desc limit 20""", (a0, a1))
+    tm = dados.temas()
+    macros = tm[tm.nivel == 1].sort_values("n_total", ascending=False)
+    macro_sel = st.selectbox("Macrotema", macros.tema_id.tolist(), index=None, format_func=dados.rotulo_tema,
+                             placeholder="Todos — os 20 temas com mais documentos", key="emb_macro")
+    filtro = "and t.macro_id = ?" if macro_sel else ""
+    k = q(f"""select t.tema_id, count(*) n from doc_tema t join documento d using (doc_uid)
+              where d.ano between ? and ? {filtro} group by 1 order by n desc
+              {"" if macro_sel else "limit 20"}""", (a0, a1) + ((macro_sel,) if macro_sel else ()))
     k["tema"] = k.tema_id.map(dados.rotulo_tema)
-    k["macro"] = k.tema_id.map(dados.temas().set_index("tema_id").pai_id).map(dados.rotulo_tema)
-    st.plotly_chart(px.bar(k.sort_values("n"), x="n", y="tema", color="macro", orientation="h", height=620,
-                           labels={"n": "Documentos", "tema": "", "macro": "Macrotema"}), width="stretch")
+    k["macro"] = k.tema_id.map(tm.set_index("tema_id").pai_id).map(dados.rotulo_tema)
+    k = k.sort_values("n", ascending=False)
+    fig = px.bar(k, x="n", y="tema", color="macro", orientation="h",
+                 height=max(320, 28 * len(k) + 120), color_discrete_map=dados.cores_macrotemas(),
+                 category_orders={"tema": k.tema.tolist()},
+                 labels={"n": "Documentos", "tema": "", "macro": "Macrotema"})
+    # clicar na legenda não esconde barras (a escolha do macrotema é pelo seletor acima)
+    fig.update_layout(legend=dict(itemclick=False, itemdoubleclick=False), showlegend=not macro_sel)
+    st.plotly_chart(fig, width="stretch")
+    st.caption("Todos os temas do macrotema escolhido." if macro_sel else
+               "Os 20 temas com mais documentos no período; escolha um macrotema para ver todos os seus temas.")
     ui.tabela_navegavel(k[["tema_id", "tema", "macro", "n"]], "tema", "tema_id", "emb_temas", altura=300,
                         colunas={"tema": "Tema", "macro": "Macrotema", "n": "Documentos"})
     ui.aviso_tema_provisorio()

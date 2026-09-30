@@ -224,6 +224,14 @@ def temas() -> pd.DataFrame:
     return t
 
 
+def cores_macrotemas() -> dict[str, str]:
+    """Cor fixa por macrotema (nome → cor), a mesma em todos os gráficos; 26 cores distintas."""
+    import plotly.express as px
+    macros = temas().query("nivel == 1").sort_values("tema_id")
+    paleta = px.colors.qualitative.Alphabet
+    return {r: paleta[i % len(paleta)] for i, r in enumerate(macros.rotulo)}
+
+
 def rotulo_tema(tema_id: str) -> str:
     t = temas().set_index("tema_id")
     return t.rotulo.get(tema_id, tema_id)
