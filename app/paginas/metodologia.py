@@ -59,14 +59,6 @@ de um autor numa obra é a unidade depositante quando ela é unidade conhecida d
   mudar um nome não altera a classificação. O modelo é reajustado periodicamente (ex.: anual) para manter os temas
   estáveis entre as atualizações mensais.
 
-### Programação da Embrapa
-- **Desafios para Inovação** (107), cada um ligado a um portfólio, objetivo estratégico, meta e ODS.
-- Cada documento produzido sob a programação atual (projetos em execução desde 2024; publicações e tecnologias
-  de 2024 em diante) é comparado ao texto de cada desafio pelo mesmo modelo SBERT; guardam-se os 3 desafios mais
-  aderentes, e o 1º define portfólio, objetivo, meta e ODS.
-- **Confiança**: terços da similaridade com o 1º desafio, por tipo de documento (alta, média, baixa).
-- É aderência de conteúdo, não o vínculo formal no SEG. O ODS vem do desafio (49 dos 107 apontam para o ODS 2).
-
 ### Camada territorial
 - **Sedes**: coordenadas do campus-sede de cada unidade (Portal Embrapa).
 - **Onde a pesquisa acontece**: municípios citados em título, resumo e palavras-chave, confrontados com a lista

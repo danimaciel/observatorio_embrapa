@@ -17,8 +17,9 @@ NIVEIS = {"portfolio": "Portfólio", "objetivo": "Objetivo estratégico", "meta"
 CONF = {"alta": "Alta", "media": "Média", "baixa": "Baixa"}
 
 st.title("Programação")
-if "doc_desafio" not in set(q("select table_name from duckdb_tables()").table_name):
-    st.info("A camada de programação ainda não foi gerada neste banco.")
+st.warning("Uso interno — esta página não é publicada no app online.", icon=":material/lock:")
+if not dados.tem_interno():
+    st.info("A camada de programação é de uso interno e só está disponível no computador da equipe.")
     st.stop()
 
 st.caption("Aderência da produção à estrutura da programação da Embrapa — Desafios para Inovação, portfólios, "
@@ -39,7 +40,7 @@ with st.expander("Como ler esta página"):
 
 @st.cache_data(show_spinner=False)
 def desafios() -> pd.DataFrame:
-    d = q("select * from desafio")
+    d = q("select * from interno.desafio")
     d["ods_rotulo"] = d.ods_num.map(lambda n: f"ODS {int(n)} · {ODS.get(int(n), '')}" if pd.notna(n) else "Sem ODS")
     d["meta_rotulo"] = d.meta_id + " · " + d.meta.str.slice(0, 90) + d.meta.str.len().gt(90).map({True: "…", False: ""}) \
         + d.meta_encerrada.map({True: " (encerrada)", False: ""})
@@ -70,7 +71,7 @@ if not conf or not tipos:
 join_un = "join documento_unidade du using (doc_uid)" if unidade else ""
 filtro_un = "and du.unidade_id = ?" if unidade else ""
 base = q(f"""select distinct dd.doc_uid, dd.desafio_id, dd.sim, dd.confianca, d.tipo_doc, d.ano, d.titulo, d.unidade_id
-             from doc_desafio dd join documento d using (doc_uid) {join_un}
+             from interno.doc_desafio dd join documento d using (doc_uid) {join_un}
              where dd.rank = 1 and list_contains(?, dd.confianca) and list_contains(?, d.tipo_doc) {filtro_un}""",
          (list(conf), list(tipos)) + ((unidade,) if unidade else ()))
 base = base.merge(des, on="desafio_id", how="left")
@@ -110,7 +111,7 @@ with t_estr:
 
 with t_un:
     x = q(f"""select du.unidade_id, dd.desafio_id, count(distinct dd.doc_uid) n
-              from doc_desafio dd join documento d using (doc_uid) join documento_unidade du using (doc_uid)
+              from interno.doc_desafio dd join documento d using (doc_uid) join documento_unidade du using (doc_uid)
               where dd.rank = 1 and list_contains(?, dd.confianca) and list_contains(?, d.tipo_doc)
               group by all""", (list(conf), list(tipos))).merge(des[["desafio_id", "portfolio"]], on="desafio_id")
     m = x.groupby(["unidade_id", "portfolio"]).n.sum().unstack(fill_value=0)
@@ -148,7 +149,7 @@ with t_docs:
     if nivel == "desafio":
         # para um desafio, entram também documentos em que ele é o 2º ou 3º mais aderente
         docs = q(f"""select dd.doc_uid, dd.rank, dd.sim, dd.confianca, d.tipo_doc tipo, d.ano, d.titulo, d.unidade_id
-                     from doc_desafio dd join documento d using (doc_uid) {join_un}
+                     from interno.doc_desafio dd join documento d using (doc_uid) {join_un}
                      where dd.desafio_id = ? and list_contains(?, dd.confianca) and list_contains(?, d.tipo_doc)
                      {filtro_un} order by dd.sim desc limit 300""",
                  (dd.desafio_id.iloc[0], list(conf), list(tipos)) + ((unidade,) if unidade else ()))

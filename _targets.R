@@ -139,15 +139,19 @@ list(
   ), "data/processed"), format = "file"),
   tar_target(geo_biomas_app, exportar_geo_biomas(arq_biomas, "app/assets/br_biomas.geojson"), format = "file"),
 
-  # Programação da Embrapa: aderência aos Desafios para Inovação (conteúdo desde 2024)
+  # Programação da Embrapa: aderência aos Desafios para Inovação (conteúdo desde 2024).
+  # Uso interno: fica em observatorio_local.duckdb, fora do banco publicado.
   tar_target(arq_ref_desafios, "ref/programacao_desafios.csv", format = "file"),
   tar_target(semantica_programacao, rodar_python(
     "pipeline/py/programacao.py",
     saidas = c("data/processed/desafio.parquet", "data/processed/doc_desafio.parquet"),
     dep = list(embeddings, parquets_semantica, arq_ref_desafios)), format = "file"),
 
+  tar_target(duckdb_local, construir_duckdb_local(semantica_programacao, "data/processed/observatorio_local.duckdb"),
+             format = "file"),
+
   tar_target(duckdb_app, construir_duckdb_app(c(parquets, parquets_semantica, semantica_similaridade, semantica_temas,
-                                                semantica_municipios, parquets_biomas, semantica_programacao),
+                                                semantica_municipios, parquets_biomas),
                                               "data/processed/observatorio_app.duckdb"),
              format = "file"),
   tar_target(auditoria, amostra_auditoria(doc_pessoa, pessoa, publicacao, projeto,

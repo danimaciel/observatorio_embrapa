@@ -70,12 +70,12 @@ pipeline de novo, sem alterar o app. Páginas: Embrapa · Unidades · Redes · M
 Documentos · Metodologia. Links diretos: `/unidades?unidade=solos`, `/pesquisadores?pessoa=PE39798`,
 `/documentos?doc=OB:160215`.
 
-## Programação (página Programação)
+## Programação (uso interno)
 
-`pipeline/py/programacao.py` compara cada documento desde 2024 aos 107 Desafios para Inovação
-(`ref/programacao_desafios.csv`: desafio → portfólio, objetivo, meta, ODS) por similaridade SBERT; guarda os 3
-mais aderentes com confiança alta/média/baixa. Amostra para conferência: `relatorios/programacao_amostra.csv`
-(coluna `correto`). Nova versão da programação: substituir o CSV e rodar o pipeline.
+`pipeline/py/programacao.py` mede a aderência semântica (SBERT) dos documentos desde 2024 aos Desafios para
+Inovação da programação, a partir de `ref/programacao_desafios.csv` (interno, fora do repositório). O resultado
+vai para `data/processed/observatorio_local.duckdb`, que **não é publicado**: o app local o anexa e mostra a
+página *Programação*; o app online não a tem.
 
 ## Camada territorial (página Mapa)
 

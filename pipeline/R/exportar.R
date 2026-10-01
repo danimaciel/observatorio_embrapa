@@ -47,11 +47,17 @@ TABELAS_APP <- list(
                        filtro = "confianca IN ('alta', 'media')"),
   doc_estado = "*",
   municipio_centroide = "*",
-  doc_bioma = "*",
-  # programação: aderência semântica aos Desafios para Inovação
-  desafio = "*",
-  doc_desafio = "*"
+  doc_bioma = "*"
 )
+
+# Programação (Desafios para Inovação): uso interno. Vai para um banco à parte,
+# lido só pelo app local — nunca publicado na Release.
+TABELAS_LOCAIS <- c("desafio", "doc_desafio")
+
+construir_duckdb_local <- function(parquets, db_path) {
+  por_nome <- stats::setNames(parquets, tools::file_path_sans_ext(basename(parquets)))
+  construir_duckdb(por_nome[TABELAS_LOCAIS], db_path)
+}
 
 construir_duckdb_app <- function(parquets, db_path) {
   if (file.exists(db_path)) file.remove(db_path)

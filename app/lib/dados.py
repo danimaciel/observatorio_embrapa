@@ -22,6 +22,8 @@ import streamlit as st
 
 RAIZ = Path(__file__).resolve().parents[2]
 DB = RAIZ / "data" / "processed" / "observatorio_app.duckdb"
+# Camadas de uso interno (programação): só existem localmente e nunca vão para a Release
+DB_LOCAL = RAIZ / "data" / "processed" / "observatorio_local.duckdb"
 
 TIPOS = {"projeto": "Projetos", "publicacao": "Publicações", "tecnologia": "Tecnologias"}
 CORES_TIPO = {"projeto": "#2E7D32", "publicacao": "#1565C0", "tecnologia": "#EF6C00"}
@@ -125,7 +127,15 @@ def conexao() -> duckdb.DuckDBPyConnection:
         st.error(f"Base não encontrada em `{DB}`. Rode o pipeline (`targets::tar_make()`) ou configure "
                  "`[dados]` em `.streamlit/secrets.toml`.")
         st.stop()
-    return duckdb.connect(str(caminho), read_only=True)
+    con = duckdb.connect(str(caminho), read_only=True)
+    if not cfg and DB_LOCAL.exists():
+        con.execute(f"ATTACH '{DB_LOCAL.as_posix()}' AS interno (READ_ONLY)")
+    return con
+
+
+def tem_interno() -> bool:
+    """Banco local com as camadas internas (programação) anexado como 'interno'."""
+    return bool(q("select count(*) n from duckdb_tables() where database_name = 'interno'").n.iloc[0])
 
 
 @st.cache_data(ttl=3600, show_spinner=False)
