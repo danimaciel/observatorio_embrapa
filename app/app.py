@@ -18,6 +18,7 @@ paginas = {
         st.Page("paginas/redes.py", title="Redes", icon=":material/hub:", url_path="redes"),
         st.Page("paginas/mapa.py", title="Mapa", icon=":material/map:", url_path="mapa"),
         st.Page("paginas/temas.py", title="Temas", icon=":material/category:", url_path="temas"),
+        st.Page("paginas/programacao.py", title="Programação", icon=":material/flag:", url_path="programacao"),
     ],
     "Consulta": [
         st.Page("paginas/pesquisadores.py", title="Pesquisadores", icon=":material/person_search:",
@@ -30,11 +31,6 @@ paginas = {
                 url_path="metodologia"),
     ],
 }
-# Área restrita (programação): local, com o banco presente; online, protegida por senha
-if dados.tem_interno():
-    paginas["Área restrita"] = [
-        st.Page("paginas/programacao.py", title="Programação", icon=":material/flag:", url_path="programacao"),
-    ]
 pg = st.navigation(paginas)
 
 with st.sidebar:

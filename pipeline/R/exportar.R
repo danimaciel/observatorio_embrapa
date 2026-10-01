@@ -47,28 +47,13 @@ TABELAS_APP <- list(
                        filtro = "confianca IN ('alta', 'media')"),
   doc_estado = "*",
   municipio_centroide = "*",
-  doc_bioma = "*"
+  doc_bioma = "*",
+  # programação: aderência semântica aos Desafios para Inovação (resultados públicos;
+  # a planilha da programação, ref/programacao_desafios.csv, fica fora do repositório
+  # e o status interno das metas não vai para o app)
+  desafio = "desafio_id, portfolio, objetivo_id, objetivo, meta_id, meta, ods_num, ods, desafio",
+  doc_desafio = "*"
 )
-
-# Programação (Desafios para Inovação): uso restrito. Banco à parte e autossuficiente
-# (desafios, aderência e o mínimo dos documentos envolvidos), lido só pela página
-# restrita: localmente direto do disco; no app online, baixado da Release privada
-# apenas depois da senha (ver app/lib/dados.py). Nunca entra no banco público.
-construir_duckdb_local <- function(parquets, db_path) {
-  p <- stats::setNames(normalizePath(parquets, winslash = "/"), tools::file_path_sans_ext(basename(parquets)))
-  if (file.exists(db_path)) file.remove(db_path)
-  con <- DBI::dbConnect(duckdb::duckdb(), db_path)
-  on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
-  sql <- function(...) DBI::dbExecute(con, sprintf(...))
-  sql("CREATE TABLE desafio AS SELECT * FROM read_parquet('%s')", p[["desafio"]])
-  sql("CREATE TABLE doc_desafio AS SELECT * FROM read_parquet('%s')", p[["doc_desafio"]])
-  sql("CREATE TABLE doc_info AS SELECT doc_uid, tipo_doc, titulo, ano, ano_fim, unidade_id
-       FROM read_parquet('%s') WHERE doc_uid IN (SELECT doc_uid FROM doc_desafio)", p[["documento"]])
-  sql("CREATE TABLE doc_unidade_prog AS SELECT DISTINCT doc_uid, unidade_id
-       FROM read_parquet('%s') WHERE doc_uid IN (SELECT doc_uid FROM doc_desafio)", p[["documento_unidade"]])
-  DBI::dbExecute(con, "CHECKPOINT")
-  db_path
-}
 
 construir_duckdb_app <- function(parquets, db_path) {
   if (file.exists(db_path)) file.remove(db_path)

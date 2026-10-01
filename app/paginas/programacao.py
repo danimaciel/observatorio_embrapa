@@ -3,7 +3,7 @@ import plotly.express as px
 import streamlit as st
 
 from lib import dados, ui
-from lib.dados import q, q_interno
+from lib.dados import q
 
 ODS = {1: "Erradicação da pobreza", 2: "Fome zero e agricultura sustentável", 3: "Saúde e bem-estar",
        4: "Educação de qualidade", 5: "Igualdade de gênero", 6: "Água potável e saneamento",
@@ -17,8 +17,8 @@ NIVEIS = {"portfolio": "Portfólio", "objetivo": "Objetivo estratégico", "meta"
 CONF = {"alta": "Alta", "media": "Média", "baixa": "Baixa"}
 
 st.title("Programação")
-st.caption(":material/lock: Área restrita — conteúdo da programação de uso interno.")
-if not dados.liberar_interno():
+if "doc_desafio" not in set(q("select table_name from duckdb_tables()").table_name):
+    st.info("A camada de programação ainda não foi gerada neste banco.")
     st.stop()
 
 st.caption("Aderência da produção à estrutura da programação da Embrapa — Desafios para Inovação, portfólios, "
@@ -33,16 +33,14 @@ with st.expander("Como ler esta página"):
         "conferência inicial, a maioria dos casos de confiança alta faz sentido; os de baixa, em geral, não — "
         "por isso o padrão mostra alta e média.\n"
         "- O **ODS** vem do desafio: como 49 dos 107 desafios apontam para o ODS 2, ele predomina. É uma leitura "
-        "pela programação, não uma classificação independente dos ODS.\n"
-        "- Metas marcadas como encerradas na programação aparecem com *(encerrada)*.")
+        "pela programação, não uma classificação independente dos ODS.")
 
 
 @st.cache_data(show_spinner=False)
 def desafios() -> pd.DataFrame:
-    d = q_interno("select * from desafio")
+    d = q("select * from desafio")
     d["ods_rotulo"] = d.ods_num.map(lambda n: f"ODS {int(n)} · {ODS.get(int(n), '')}" if pd.notna(n) else "Sem ODS")
-    d["meta_rotulo"] = d.meta_id + " · " + d.meta.str.slice(0, 90) + d.meta.str.len().gt(90).map({True: "…", False: ""}) \
-        + d.meta_encerrada.map({True: " (encerrada)", False: ""})
+    d["meta_rotulo"] = d.meta_id + " · " + d.meta.str.slice(0, 90) + d.meta.str.len().gt(90).map({True: "…", False: ""})
     d["desafio_rotulo"] = d.desafio_id + " · " + d.desafio.str.slice(0, 90) + \
         d.desafio.str.len().gt(90).map({True: "…", False: ""})
     return d
@@ -67,10 +65,10 @@ if not conf or not tipos:
     st.info("Escolha ao menos um nível de confiança e um tipo de produção.")
     st.stop()
 
-join_un = "join doc_unidade_prog du using (doc_uid)" if unidade else ""
+join_un = "join documento_unidade du using (doc_uid)" if unidade else ""
 filtro_un = "and du.unidade_id = ?" if unidade else ""
-base = q_interno(f"""select distinct dd.doc_uid, dd.desafio_id, dd.sim, dd.confianca, d.tipo_doc, d.ano, d.titulo, d.unidade_id
-             from doc_desafio dd join doc_info d using (doc_uid) {join_un}
+base = q(f"""select distinct dd.doc_uid, dd.desafio_id, dd.sim, dd.confianca, d.tipo_doc, d.ano, d.titulo, d.unidade_id
+             from doc_desafio dd join documento d using (doc_uid) {join_un}
              where dd.rank = 1 and list_contains(?, dd.confianca) and list_contains(?, d.tipo_doc) {filtro_un}""",
          (list(conf), list(tipos)) + ((unidade,) if unidade else ()))
 base = base.merge(des, on="desafio_id", how="left")
@@ -109,8 +107,8 @@ with t_estr:
     st.caption("Objetivo estratégico › portfólio › desafio. Clique numa caixa para ampliar; clique no topo para voltar.")
 
 with t_un:
-    x = q_interno(f"""select du.unidade_id, dd.desafio_id, count(distinct dd.doc_uid) n
-              from doc_desafio dd join doc_info d using (doc_uid) join doc_unidade_prog du using (doc_uid)
+    x = q(f"""select du.unidade_id, dd.desafio_id, count(distinct dd.doc_uid) n
+              from doc_desafio dd join documento d using (doc_uid) join documento_unidade du using (doc_uid)
               where dd.rank = 1 and list_contains(?, dd.confianca) and list_contains(?, d.tipo_doc)
               group by all""", (list(conf), list(tipos))).merge(des[["desafio_id", "portfolio"]], on="desafio_id")
     m = x.groupby(["unidade_id", "portfolio"]).n.sum().unstack(fill_value=0)
@@ -147,8 +145,8 @@ t_docs, t_uns, t_des = st.tabs(["Documentos mais aderentes", "Unidades", "Desafi
 with t_docs:
     if nivel == "desafio":
         # para um desafio, entram também documentos em que ele é o 2º ou 3º mais aderente
-        docs = q_interno(f"""select dd.doc_uid, dd.rank, dd.sim, dd.confianca, d.tipo_doc tipo, d.ano, d.titulo, d.unidade_id
-                     from doc_desafio dd join doc_info d using (doc_uid) {join_un}
+        docs = q(f"""select dd.doc_uid, dd.rank, dd.sim, dd.confianca, d.tipo_doc tipo, d.ano, d.titulo, d.unidade_id
+                     from doc_desafio dd join documento d using (doc_uid) {join_un}
                      where dd.desafio_id = ? and list_contains(?, dd.confianca) and list_contains(?, d.tipo_doc)
                      {filtro_un} order by dd.sim desc limit 300""",
                  (dd.desafio_id.iloc[0], list(conf), list(tipos)) + ((unidade,) if unidade else ()))
@@ -165,7 +163,7 @@ with t_docs:
                                  "sim": st.column_config.ProgressColumn("Aderência", min_value=0, max_value=0.5,
                                                                         format="%.2f")})
 with t_uns:
-    u = q_interno("select doc_uid, unidade_id from doc_unidade_prog where list_contains(?, doc_uid)",
+    u = q("select doc_uid, unidade_id from documento_unidade where list_contains(?, doc_uid)",
           (sub.doc_uid.tolist(),))
     u = u.groupby("unidade_id").doc_uid.nunique().sort_values(ascending=False).reset_index(name="documentos")
     u["unidade"] = u.unidade_id.map(dados.rotulo_unidade)

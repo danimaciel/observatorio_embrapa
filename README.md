@@ -70,18 +70,13 @@ pipeline de novo, sem alterar o app. Páginas: Embrapa · Unidades · Redes · M
 Documentos · Metodologia. Links diretos: `/unidades?unidade=solos`, `/pesquisadores?pessoa=PE39798`,
 `/documentos?doc=OB:160215`.
 
-## Programação (uso interno)
+## Programação (página Programação)
 
-`pipeline/py/programacao.py` mede a aderência semântica (SBERT) dos documentos desde 2024 aos Desafios para
-Inovação da programação, a partir de `ref/programacao_desafios.csv` (interno, fora do repositório). O resultado
-vai para `data/processed/observatorio_local.duckdb`, separado do banco público. O app local mostra a página
-*Programação* (Área restrita) direto; no app online ela **pede senha** e só então baixa esse arquivo da Release
-privada. Para habilitar online, publique o arquivo na mesma Release e acrescente aos secrets:
-
-```toml
-[interno]
-senha = "<senha da área restrita>"
-```
+`pipeline/py/programacao.py` compara cada documento desde 2024 aos 107 Desafios para Inovação
+(`ref/programacao_desafios.csv`: desafio → portfólio, objetivo, meta, ODS) por similaridade SBERT; guarda os 3
+mais aderentes com confiança alta/média/baixa. Os **resultados** são públicos no app; a planilha da programação
+é interna e não está no repositório (copie-a para `ref/` antes de rodar o pipeline). Amostra para conferência:
+`relatorios/programacao_amostra.csv` (coluna `correto`). Nova versão da programação: substituir o CSV e rodar.
 
 ## Camada territorial (página Mapa)
 
