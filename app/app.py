@@ -30,9 +30,9 @@ paginas = {
                 url_path="metodologia"),
     ],
 }
-# Programação: uso interno, só aparece quando o banco local está presente (nunca no app publicado)
+# Área restrita (programação): local, com o banco presente; online, protegida por senha
 if dados.tem_interno():
-    paginas["Uso interno"] = [
+    paginas["Área restrita"] = [
         st.Page("paginas/programacao.py", title="Programação", icon=":material/flag:", url_path="programacao"),
     ]
 pg = st.navigation(paginas)

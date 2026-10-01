@@ -74,8 +74,14 @@ Documentos · Metodologia. Links diretos: `/unidades?unidade=solos`, `/pesquisad
 
 `pipeline/py/programacao.py` mede a aderência semântica (SBERT) dos documentos desde 2024 aos Desafios para
 Inovação da programação, a partir de `ref/programacao_desafios.csv` (interno, fora do repositório). O resultado
-vai para `data/processed/observatorio_local.duckdb`, que **não é publicado**: o app local o anexa e mostra a
-página *Programação*; o app online não a tem.
+vai para `data/processed/observatorio_local.duckdb`, separado do banco público. O app local mostra a página
+*Programação* (Área restrita) direto; no app online ela **pede senha** e só então baixa esse arquivo da Release
+privada. Para habilitar online, publique o arquivo na mesma Release e acrescente aos secrets:
+
+```toml
+[interno]
+senha = "<senha da área restrita>"
+```
 
 ## Camada territorial (página Mapa)
 

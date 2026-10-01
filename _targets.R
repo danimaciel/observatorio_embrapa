@@ -147,7 +147,8 @@ list(
     saidas = c("data/processed/desafio.parquet", "data/processed/doc_desafio.parquet"),
     dep = list(embeddings, parquets_semantica, arq_ref_desafios)), format = "file"),
 
-  tar_target(duckdb_local, construir_duckdb_local(semantica_programacao, "data/processed/observatorio_local.duckdb"),
+  tar_target(duckdb_local, construir_duckdb_local(c(semantica_programacao, parquets_semantica),
+                                                     "data/processed/observatorio_local.duckdb"),
              format = "file"),
 
   tar_target(duckdb_app, construir_duckdb_app(c(parquets, parquets_semantica, semantica_similaridade, semantica_temas,

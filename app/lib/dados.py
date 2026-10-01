@@ -11,6 +11,7 @@ não é versionada) ele é baixado de uma Release do GitHub, configurada em
     token = "..."   # só para repositório privado
 """
 
+import hmac
 import json
 import urllib.error
 import urllib.request
@@ -22,7 +23,8 @@ import streamlit as st
 
 RAIZ = Path(__file__).resolve().parents[2]
 DB = RAIZ / "data" / "processed" / "observatorio_app.duckdb"
-# Camadas de uso interno (programação): só existem localmente e nunca vão para a Release
+# Área restrita (programação): banco à parte. Localmente é lido do disco; no app online fica
+# na Release privada e só é baixado depois da senha ([interno] nos secrets).
 DB_LOCAL = RAIZ / "data" / "processed" / "observatorio_local.duckdb"
 
 TIPOS = {"projeto": "Projetos", "publicacao": "Publicações", "tecnologia": "Tecnologias"}
@@ -72,7 +74,7 @@ GRUPOS_PUB = {
 }
 
 
-def _banco_da_release(cfg) -> Path:
+def _banco_da_release(cfg, nome: str | None = None) -> Path:
     """Garante uma cópia local do banco anexado à Release e devolve seu caminho.
 
     A cópia leva o id do arquivo na Release no nome: republicar o banco (mesmo
@@ -91,7 +93,7 @@ def _banco_da_release(cfg) -> Path:
                      "`token` nos secrets do app.")
             st.stop()
         raise
-    nome = cfg.get("arquivo", DB.name)
+    nome = nome or cfg.get("arquivo", DB.name)
     asset = next((a for a in release["assets"] if a["name"] == nome), None)
     if asset is None:
         st.error(f"O arquivo `{nome}` não está na release `{cfg['tag']}`.")
@@ -127,15 +129,63 @@ def conexao() -> duckdb.DuckDBPyConnection:
         st.error(f"Base não encontrada em `{DB}`. Rode o pipeline (`targets::tar_make()`) ou configure "
                  "`[dados]` em `.streamlit/secrets.toml`.")
         st.stop()
-    con = duckdb.connect(str(caminho), read_only=True)
-    if not cfg and DB_LOCAL.exists():
-        con.execute(f"ATTACH '{DB_LOCAL.as_posix()}' AS interno (READ_ONLY)")
-    return con
+    return duckdb.connect(str(caminho), read_only=True)
+
+
+# Área restrita -------------------------------------------------------------------
+
+def _secao(nome: str):
+    try:
+        return st.secrets.get(nome)
+    except Exception:  # sem secrets.toml (uso local)
+        return None
+
+
+def _online() -> bool:
+    return bool(_secao("dados"))
 
 
 def tem_interno() -> bool:
-    """Banco local com as camadas internas (programação) anexado como 'interno'."""
-    return bool(q("select count(*) n from duckdb_tables() where database_name = 'interno'").n.iloc[0])
+    """A área restrita existe neste app? Local: banco presente. Online: senha configurada."""
+    if _online():
+        return bool((_secao("interno") or {}).get("senha"))
+    return DB_LOCAL.exists()
+
+
+def liberar_interno() -> bool:
+    """Pede a senha no app online; no computador da equipe libera direto."""
+    if not _online():
+        return DB_LOCAL.exists()
+    if st.session_state.get("interno_ok"):
+        return True
+    senha = str((_secao("interno") or {}).get("senha", ""))
+    if not senha:
+        st.info("Área restrita não configurada neste app.")
+        return False
+    with st.form("form_interno"):
+        st.markdown("**Área restrita.** Digite a senha para ver esta página.")
+        tentativa = st.text_input("Senha", type="password")
+        if st.form_submit_button("Entrar"):
+            if senha and hmac.compare_digest(tentativa.encode(), senha.encode()):
+                st.session_state["interno_ok"] = True
+                st.rerun()
+            st.error("Senha incorreta.")
+    return False
+
+
+@st.cache_resource(show_spinner="Carregando a área restrita…")
+def _conexao_interna() -> duckdb.DuckDBPyConnection:
+    if _online():
+        nome = (_secao("interno") or {}).get("arquivo", DB_LOCAL.name)
+        caminho = _banco_da_release(_secao("dados"), nome=nome)
+    else:
+        caminho = DB_LOCAL
+    return duckdb.connect(str(caminho), read_only=True)
+
+
+def q_interno(sql: str, params: tuple = ()) -> pd.DataFrame:
+    """Consulta ao banco restrito. Só chamar depois de liberar_interno() (sem cache compartilhado)."""
+    return _conexao_interna().cursor().execute(sql, list(params)).df()
 
 
 @st.cache_data(ttl=3600, show_spinner=False)
