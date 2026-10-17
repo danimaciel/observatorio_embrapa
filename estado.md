@@ -1,13 +1,33 @@
 # Estado do projeto · Observatório de Pesquisa da Embrapa
 
-*Atualizado em 2026-10-15. Atualizar este arquivo ao fim de cada sessão de trabalho.*
+*Atualizado em 2026-10-17. Atualizar este arquivo ao fim de cada sessão de trabalho.*
+
+## Rodada de outubro e camadas novas (17/10/2026)
+
+- **Exportação 2026-10 processada** (base de pessoas de setembro reaproveitada, com autorização da usuária).
+  Volumes (banco do app): 180.951 obras (+3.540; +2,0% sobre 2026-09) · 1.266 soluções (+17) · 3.192 projetos (+1).
+  Testes: 11/11. Publicado: release privada `dados-2026-10` e release pública `enriquecimento-2026-10`.
+- **Produtos agropecuários** (`doc_produto`): 119.967 documentos com produto principal; 143.678 pares principais e
+  28.577 citados. Taxonomia de 104 produtos, base IBGE. Validação aguardando a usuária
+  (`relatorios/produtos_validacao_2026-09.xlsx`).
+- **Estados** (`doc_estado.fonte`): 51.790 documentos com estado (40.632 citados + 11.741 via município, com
+  sobreposição); em 2026-09 eram 40.032 só com citação.
+- **Arquivo público de resultados** (`pipeline/py/enriquecimento.py`, target `enriquecimento`) consumido pelos três
+  iAgro, já publicados com filtros e etiquetas (iagro-embrapa também com mapa).
+- **Correção:** `vetores.py` desalinhava a matriz quando dois documentos tinham texto idêntico (hash repetido no
+  cache); agora uma linha por hash.
+- **Pendente:**
+  1. usuária trocar `tag = "dados-2026-10"` nos Secrets do app do Observatório e dar Reboot; **token vence 28/10**;
+  2. rodada de outubro do Florestas Plantadas (pipeline FP, site, app e release das Florestas);
+  3. validação da amostra de produtos; termos em inglês para publicações em inglês;
+  4. página de produtos/mapa no app Streamlit do Observatório (dados já no banco: `doc_produto`).
 
 ## Dados em produção
 
-- **Exportação:** Redape **2026-09** (`EXPORTACAO <- "2026-09"` em `_targets.R`), processada em 28/09/2026.
-- **Base:** 177.411 publicações · 1.249 soluções tecnológicas · 3.191 projetos (181.851 documentos);
+- **Exportação:** Redape **2026-10** (`EXPORTACAO <- "2026-10"` em `_targets.R`), processada em 17/10/2026.
+- **Base:** 180.951 publicações (obras) · 1.266 soluções tecnológicas · 3.192 projetos (185.409 documentos);
   publicações completas (o arquivo truncado de 33 MB foi substituído pelo completo).
-- **Banco publicado:** release `dados-2026-09` em danimaciel/observatorio_embrapa_dados (privado).
+- **Banco publicado:** release `dados-2026-10` em danimaciel/observatorio_embrapa_dados (privado); o app ainda aponta para `dados-2026-09` até a troca do Secret.
 - **App:** público no Streamlit Community Cloud (código em github.com/danimaciel/observatorio_embrapa).
 - Último commit no código: 30/09/2026 ("Programação: leitura por unidade mais clara").
 

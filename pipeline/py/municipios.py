@@ -14,7 +14,8 @@ frequência em minúsculas (manga, floresta, canela, palmeira...) só contam
 com a UF ao lado. Nomes que também são estados (Goiás, Paraná, Tocantins,
 São Paulo...) contam como menção ao estado, salvo com a UF ao lado.
 
-Saídas em data/processed/: doc_municipio.parquet, doc_estado.parquet
+Saídas em data/processed/: doc_municipio.parquet, doc_estado.parquet (estados citados + estado dos
+municípios de confiança alta/média, com a coluna fonte = "citado" ou "municipio")
 Relatório: relatorios/piloto_municipios.md e amostra para conferência.
 Uso: .venv-nlp/Scripts/python pipeline/py/municipios.py
 """
@@ -168,7 +169,12 @@ def main() -> None:
     dm = pd.DataFrame(mencoes, columns=["doc_uid", "cod_ibge", "municipio", "uf", "confianca", "motivo", "trecho"])
     dm = dm.drop_duplicates(["doc_uid", "cod_ibge", "confianca"])
     dm.drop(columns="trecho").to_parquet(PROC / "doc_municipio.parquet", index=False)
-    de = pd.DataFrame(estados, columns=["doc_uid", "uf"]).drop_duplicates()
+    # Estados: citados no texto + estado dos municípios citados (confiança alta ou média). Homônimos só têm
+    # confiança média quando o próprio texto cita o estado, então nenhum estado é inferido de um homônimo
+    # sem essa confirmação (decisão da usuária, 17/10/2026). fonte = "citado" ou "municipio".
+    de = pd.DataFrame(estados, columns=["doc_uid", "uf"]).drop_duplicates().assign(fonte="citado")
+    via_mun = dm[dm.confianca.isin(["alta", "media"])][["doc_uid", "uf"]].drop_duplicates().assign(fonte="municipio")
+    de = pd.concat([de, via_mun]).drop_duplicates(["doc_uid", "uf"], keep="first")
     de.to_parquet(PROC / "doc_estado.parquet", index=False)
 
     # Relatório do piloto ------------------------------------------------------------

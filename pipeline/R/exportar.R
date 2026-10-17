@@ -48,6 +48,8 @@ TABELAS_APP <- list(
   doc_estado = "*",
   municipio_centroide = "*",
   doc_bioma = "*",
+  # produtos agropecuários citados (taxonomia ref/produtos.csv, base IBGE)
+  doc_produto = "*",
   # programação: aderência semântica aos Desafios para Inovação (resultados públicos;
   # a planilha da programação, ref/programacao_desafios.csv, fica fora do repositório
   # e o status interno das metas não vai para o app)

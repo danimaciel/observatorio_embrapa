@@ -8,7 +8,7 @@ tar_option_set(packages = c("dplyr", "tidyr", "stringr", "stringi", "readr", "re
                             "purrr", "igraph", "arrow", "duckdb", "DBI", "janitor"))
 tar_source("pipeline/R")
 
-EXPORTACAO <- "2026-09"
+EXPORTACAO <- "2026-10"
 # Arquivo truncado interrompe o pipeline. Use TRUE apenas para testes com
 # uma exportação sabidamente incompleta (o último registro é descartado).
 PERMITIR_TRUNCADO <- FALSE
@@ -139,6 +139,22 @@ list(
   ), "data/processed"), format = "file"),
   tar_target(geo_biomas_app, exportar_geo_biomas(arq_biomas, "app/assets/br_biomas.geojson"), format = "file"),
 
+  # Produtos agropecuários citados (taxonomia ref/produtos.csv, base IBGE PAM/PPM/PEVS; gerador
+  # pipeline/py/produtos_taxonomia.py)
+  tar_target(arq_ref_produtos, "ref/produtos.csv", format = "file"),
+  tar_target(semantica_produtos, rodar_python(
+    "pipeline/py/produtos.py",
+    saidas = "data/processed/doc_produto.parquet",
+    dep = list(parquets_semantica, arq_ref_produtos)), format = "file"),
+
+  # Arquivo público de resultados (produtos + localização por documento) para os projetos iAgro;
+  # publicado como release "enriquecimento-AAAA-MM" em danimaciel/observatorio_embrapa
+  tar_target(enriquecimento, rodar_python(
+    "pipeline/py/enriquecimento.py",
+    saidas = c("data/processed/enriquecimento.csv.gz", "data/processed/registro_obra.csv.gz",
+               "data/processed/produtos.csv"),
+    dep = list(semantica_produtos, semantica_municipios, parquets_biomas)), format = "file"),
+
   # Programação da Embrapa: aderência aos Desafios para Inovação (conteúdo desde 2024)
   tar_target(arq_ref_desafios, "ref/programacao_desafios.csv", format = "file"),
   tar_target(semantica_programacao, rodar_python(
@@ -147,7 +163,8 @@ list(
     dep = list(embeddings, parquets_semantica, arq_ref_desafios)), format = "file"),
 
   tar_target(duckdb_app, construir_duckdb_app(c(parquets, parquets_semantica, semantica_similaridade, semantica_temas,
-                                                semantica_municipios, parquets_biomas, semantica_programacao),
+                                                semantica_municipios, parquets_biomas, semantica_programacao,
+                                                semantica_produtos),
                                               "data/processed/observatorio_app.duckdb"),
              format = "file"),
   tar_target(auditoria, amostra_auditoria(doc_pessoa, pessoa, publicacao, projeto,

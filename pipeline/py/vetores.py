@@ -20,6 +20,9 @@ def carregar_vetores(calibrar: bool = True) -> tuple[pd.DataFrame, np.ndarray]:
     docs = textos_para_modelo()[["doc_uid", "tipo_doc", "hash"]]
     ids, vet = ler_cache()
     linha = pd.Series(np.arange(len(ids)), index=ids.hash)
+    # textos idênticos em documentos diferentes compartilham o vetor: uma linha por hash (sem isso, cada documento
+    # com texto repetido puxava todas as linhas daquele hash e a matriz desalinhava dos documentos — out/2026)
+    linha = linha[~linha.index.duplicated()]
     docs = docs[docs.hash.isin(linha.index)].reset_index(drop=True)
     V = vet[linha.loc[docs.hash].values].astype(np.float32)
     meta = pd.read_parquet(PROC / "documento.parquet", columns=["doc_uid", "ano", "titulo"])

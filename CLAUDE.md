@@ -29,6 +29,23 @@ roteiro de atualização mensal: `README.md`.
 - Não re-sortear amostras já rotuladas; rótulos ficam ligados a `doc_uid`.
 - SBERT nunca leva stopwords (só os rótulos do BERTopic).
 
+## Camadas de produto e localização (desde 17/10/2026)
+
+- **Produtos agropecuários** (`doc_produto`): taxonomia de 104 produtos com base nas categorias oficiais do IBGE
+  (PAM 5457, PPM 3939/74/3940, PEVS 289/291; cópia em `ref/ibge_produtos_sidra.json`), grupo de atividade CNAE e
+  categorias amplas. **Editar `pipeline/py/produtos_taxonomia.py`** (gera `ref/produtos.csv`), nunca o `.csv`.
+  Marcação em `pipeline/py/produtos.py` (target `semantica_produtos`): apaga nomes de unidades da Embrapa antes de
+  procurar, exige palavra inteira fora de composto com hífen, usa contexto e exclusões. Força **principal** (título
+  ou palavras-chave) × **citado** (só resumo): etiquetas, filtros e contagens usam só **principal**.
+  Termos, sinônimos e agrupamentos amplos são proposta a referendar; validação em `relatorios/produtos_validacao_*.xlsx`.
+- **Estados** (`doc_estado.fonte`): `citado` no texto ou `municipio` (estado do município de confiança alta/média;
+  homônimo só entra quando o texto confirma o estado — decisão da usuária).
+- Nota metodológica: `documentacao/Produtos_e_localizacao_2026-10-17.{md,docx}` (entra na documentação principal
+  na atualização de outubro).
+- **Projetos iAgro** consomem essas camadas: danimaciel/iagro (piloto Territorial), danimaciel/iagro-embrapa (busca
+  em toda a Embrapa) e danimaciel/iagro-conversa (RAG no navegador). Pastas-irmãs `../IAGRO`, `../iagro-embrapa`,
+  `../iagro-conversa`. O Observatório é a fonte única de produtos e localização para eles; regras mudam aqui.
+
 ## Publicação
 
 - Código público: github.com/danimaciel/observatorio_embrapa · dados privados: danimaciel/observatorio_embrapa_dados
