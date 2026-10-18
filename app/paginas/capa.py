@@ -21,6 +21,10 @@ ANO_MIN = 1990
 # publicações e tecnologias com ano >= 2024.
 DESDE_2024 = "(case when d.tipo_doc = 'projeto' then coalesce(d.ano_fim, 9999) >= 2024 else d.ano >= 2024 end)"
 
+# A capa usa camadas do banco 2026-10 em diante; com um banco anterior, abre a página Embrapa
+if not {"doc_produto", "doc_localizacao"} <= set(q("select table_name from duckdb_tables()").table_name):
+    st.switch_page("paginas/embrapa.py")
+
 st.markdown("""
 <style>
 .hero {padding: 1.6rem 1.8rem; border-radius: 18px; color: #fff; margin-bottom: 1.2rem;
