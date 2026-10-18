@@ -1,8 +1,8 @@
 """Rascunho da tabela tema (BERTopic) → portfólio(s) e especificação(ões) do Plano Diretor 2024–2030.
 
 Status: proposta do Claude (18/10/2026) REFERENDADA pela usuária em 18/10/2026 (revisão em
-relatorios/tema_programacao_revisao.xlsx: 144 ok, 2 corrigir); T031 Seringueira marcada "corrigir" sem a correção
-registrada — pendente de confirmação. Fontes dos critérios: caracterização oficial
+relatorios/tema_programacao_revisao.xlsx: 144 ok, 2 corrigir); T031 Seringueira corrigida pela usuária
+(Economia da Biodiversidade, O05.1). Fontes dos critérios: caracterização oficial
 dos portfólios (ref/portfolios.csv, Portal Embrapa) e especificações oficiais (ref/objetivos_estrategicos.csv,
 Plano Diretor). A ligação documento → programação é herdada do tema do documento (doc_tema).
 
@@ -41,7 +41,7 @@ P = {
     "T017": ("prosur", "", "O01.1", "", "producao", "alta", ""),
     "T022": ("ecoclima", "biodiversidade", "O02.5", "O05.1", "recursos_nat", "duvida",
              "polinizadores (serviço ecossistêmico) × mel e meliponicultura (produto da biodiversidade)"),
-    "T031": ("prosur", "biodiversidade", "O01.1", "", "producao", "media", ""),
+    "T031": ("biodiversidade", "prosur", "O05.1", "O01.1", "sociobio", "alta", "revisão da usuária (18/10/2026): Economia da Biodiversidade, O05.1"),
     "T055": ("prosur", "consumidor", "O01.1", "O03.3", "producao", "alta", ""),
     "T064": ("prosur", "everde", "O01.1", "O05.5", "producao", "media", "dendê: óleo e biocombustível"),
     "T117": ("prosur", "", "O01.1", "", "producao", "alta", ""),
@@ -212,7 +212,7 @@ P = {
 }
 
 
-PENDENTES = {"T031"}     # marcada "corrigir" na revisão sem a correção registrada
+PENDENTES: set[str] = set()     # T031 Seringueira resolvida pela usuária em 18/10/2026
 
 
 def main() -> None:
