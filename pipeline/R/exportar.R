@@ -54,7 +54,9 @@ TABELAS_APP <- list(
   # a planilha da programação, ref/programacao_desafios.csv, fica fora do repositório
   # e o status interno das metas não vai para o app)
   desafio = "desafio_id, portfolio, objetivo_id, objetivo, meta_id, meta, ods_num, ods, desafio",
-  doc_desafio = "*"
+  doc_desafio = "*",
+  # localização combinada (fonte: municipio_citado, estado_citado ou sede_unidade)
+  doc_localizacao = "*"
 )
 
 construir_duckdb_app <- function(parquets, db_path) {

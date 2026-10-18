@@ -20,7 +20,7 @@ st.caption(f"Produção e temas no território · {a0}–{a1}")
 
 tabelas = set(q("select table_name from duckdb_tables()").table_name)
 visoes = {"sede": "Sedes das unidades"}
-if "doc_municipio" in tabelas:
+if "doc_localizacao" in tabelas:     # localização combinada (banco 2026-10 em diante)
     visoes["territorio"] = "Onde a pesquisa acontece"
 if "doc_bioma" in tabelas:
     visoes["bioma"] = "Biomas"
@@ -149,101 +149,118 @@ def geo_ufs() -> dict:
     return json.loads((Path(__file__).resolve().parents[1] / "assets" / "br_uf.geojson").read_text(encoding="utf-8"))
 
 
+FONTES_LOC = {"municipio_citado": "Município citado no texto", "estado_citado": "Estado citado no texto",
+              "sede_unidade": "Sede da unidade (aproximação)"}
+ORIGENS = ["Citado no texto", "Pela sede da unidade"]
+
+
 def mapa_territorio() -> None:
     un = dados.unidades().query("n_docs > 0")
     with c3:
         unidade = st.selectbox("Produção da unidade", un.unidade_id.tolist(), index=None,
                                format_func=dados.nome_unidade, placeholder="Todas as unidades",
                                help="Mostra onde acontece a pesquisa de uma unidade específica.")
-        escala = st.radio("Agregar por", ["municipio", "estado"], horizontal=True,
+        escala = st.radio("Agregar por", ["estado", "municipio"], horizontal=True,
                           format_func={"municipio": "Município", "estado": "Estado"}.get)
-    st.info("Locais **citados nos textos** (título, resumo e palavras-chave). Só entram menções com contexto "
-            "geográfico claro — UF ou estado ao lado (“Petrolina, PE”), “município de…”, ou o estado citado no "
-            "texto —, com ~98% de precisão numa amostra conferida. Cerca de 15% das publicações e 13% dos projetos "
-            "citam algum município.", icon=":material/travel_explore:")
+    completar = st.toggle("Completar com a sede da unidade quando o texto não cita local", value=True,
+                          help="Ligado: documentos sem local no texto entram pelo município da sede da unidade "
+                               "principal — uma aproximação, mostrada em cor clara. Desligado: só locais citados.")
+    fontes = list(FONTES_LOC) if completar else ["municipio_citado", "estado_citado"]
     join_un = "join documento_unidade du using (doc_uid)" if unidade else ""
     filtro_un = "and du.unidade_id = ?" if unidade else ""
-    params = (a0, a1, list(tipos)) + params_tema + ((unidade,) if unidade else ())
+    params = (a0, a1, list(tipos)) + params_tema + ((unidade,) if unidade else ()) + (fontes,)
+    loc = q(f"""select distinct l.doc_uid, l.fonte, l.uf, l.cod_ibge, l.municipio
+                from doc_localizacao l join documento d using (doc_uid) {join_tema} {join_un}
+                where d.ano between ? and ? and list_contains(?, d.tipo_doc) {filtro_tema} {filtro_un}
+                and list_contains(?, l.fonte)""", params)
+    if loc.empty:
+        st.info("Nenhum documento com local para esses filtros.")
+        return
+    loc["origem"] = loc.fonte.map(lambda f: ORIGENS[1] if f == "sede_unidade" else ORIGENS[0])
+
+    # Composição: cada documento conta uma vez, pela fonte do seu local
+    por_fonte = loc.drop_duplicates("doc_uid").fonte.value_counts()
+    total = int(por_fonte.sum())
+    partes = [f"**{100 * por_fonte.get(f, 0) / total:.0f}%** {r.split(' (')[0].lower()}"
+              for f, r in FONTES_LOC.items() if f in fontes]
+    st.info(f"{total:,} documentos no mapa: ".replace(",", ".") + " · ".join(partes) + ". Os locais citados vêm do "
+            "título, resumo e palavras-chave (~98% de precisão numa amostra conferida); a sede da unidade indica onde "
+            "a unidade está, não necessariamente onde a pesquisa foi feita.", icon=":material/travel_explore:")
 
     if escala == "municipio":
-        m = q(f"""select dm.cod_ibge, any_value(dm.municipio) municipio, any_value(dm.uf) uf,
-                         count(distinct dm.doc_uid) documentos
-                  from doc_municipio dm join documento d using (doc_uid) {join_tema} {join_un}
-                  where d.ano between ? and ? and list_contains(?, d.tipo_doc) {filtro_tema} {filtro_un}
-                  group by dm.cod_ibge""", params)
+        m = loc[loc.cod_ibge.notna()].groupby(["cod_ibge", "origem"]).agg(
+            municipio=("municipio", "first"), uf=("uf", "first"), documentos=("doc_uid", "nunique")).reset_index()
         m = m.merge(q("select cod_ibge, lat, lon from municipio_centroide"), on="cod_ibge", how="inner")
         if m.empty:
-            st.info("Nenhum município citado com esses filtros.")
+            st.info("Nenhum município com esses filtros.")
             return
         m["local"] = m.municipio + "/" + m.uf
-        fig = px.scatter_map(m, lat="lat", lon="lon", size="documentos", size_max=35, hover_name="local",
-                             hover_data={"lat": False, "lon": False, "documentos": True},
-                             color_discrete_sequence=["#2E7D32"], zoom=3.2, center={"lat": -14.5, "lon": -52},
-                             height=680, map_style="carto-positron", opacity=0.6)
+        fig = px.scatter_map(m, lat="lat", lon="lon", size="documentos", size_max=40, hover_name="local",
+                             color="origem",
+                             hover_data={"lat": False, "lon": False, "documentos": True, "origem": True},
+                             color_discrete_map={ORIGENS[0]: "#1B5E20", ORIGENS[1]: "#A5D6A7"},
+                             category_orders={"origem": [ORIGENS[1], ORIGENS[0]]},
+                             zoom=3.2, center={"lat": -14.5, "lon": -52}, height=680, map_style="carto-positron",
+                             opacity=0.7, labels={"origem": ""})
         if unidade:
             sede = q("select * from unidade_localizacao where unidade_id = ?", (unidade,))
             if not sede.empty:
                 fig.add_trace(go.Scattermap(lat=sede.lat, lon=sede.lon, mode="markers+text", text=["Sede"],
-                                            textposition="top right", marker=dict(size=16, color="#C62828"),
-                                            name="Sede da unidade", hoverinfo="text",
+                                            textposition="top right", marker=dict(size=14, color="#C62828"),
+                                            name="Sede da unidade escolhida", hoverinfo="text",
                                             hovertext=[f"Sede: {dados.nome_unidade(unidade)}"]))
-        fig.update_layout(margin=dict(t=0, l=0, r=0, b=0), showlegend=False)
+        fig.update_layout(margin=dict(t=0, l=0, r=0, b=0), legend=dict(orientation="h", y=-0.02))
         st.plotly_chart(fig, width="stretch")
-        st.caption(f"{len(m):,} municípios citados. Tamanho = número de documentos que citam o município."
-                   .replace(",", ".") + (" Ponto vermelho = sede da unidade." if unidade else "") +
-                   " Contornos: IBGE.")
-        tabela = m.sort_values("documentos", ascending=False)[["cod_ibge", "municipio", "uf", "documentos"]]
-        chave, rotulo_col = "cod_ibge", "Município"
+        st.caption("Verde-escuro = município citado no texto; verde-claro = sede da unidade (aproximação). "
+                   "Documentos que citam só o estado aparecem na agregação por estado. Contornos: IBGE.")
+        tabela = m.pivot_table(index=["cod_ibge", "municipio", "uf"], columns="origem", values="documentos",
+                               aggfunc="sum", fill_value=0).reset_index()
+        for o in ORIGENS:
+            if o not in tabela:
+                tabela[o] = 0
+        tabela["documentos"] = tabela[ORIGENS[0]] + tabela[ORIGENS[1]]
+        tabela = tabela[["cod_ibge", "municipio", "uf", "documentos"] + ORIGENS]
+        chave = "cod_ibge"
     else:
-        e = q(f"""with m as (select distinct dm.doc_uid, dm.uf from doc_municipio dm
-                             union select distinct doc_uid, uf from doc_estado)
-                  select m.uf, count(distinct m.doc_uid) documentos
-                  from m join documento d using (doc_uid) {join_tema} {join_un}
-                  where d.ano between ? and ? and list_contains(?, d.tipo_doc) {filtro_tema} {filtro_un}
-                  group by m.uf""", params)
-        if e.empty:
-            st.info("Nenhum estado citado com esses filtros.")
-            return
+        e = loc.groupby("uf").agg(documentos=("doc_uid", "nunique")).reset_index()
+        cit = loc[loc.origem == ORIGENS[0]].groupby("uf").doc_uid.nunique()
+        e[ORIGENS[0]] = e.uf.map(cit).fillna(0).astype(int)
+        e[ORIGENS[1]] = e.documentos - e[ORIGENS[0]]
+        e["pct_citado"] = (100 * e[ORIGENS[0]] / e.documentos).round(0)
         e["codarea"] = e.uf.map(COD_UF)
         fig = px.choropleth_map(e, geojson=geo_ufs(), locations="codarea", featureidkey="properties.codarea",
                                 color="documentos", color_continuous_scale="Greens", hover_name="uf",
-                                hover_data={"codarea": False, "documentos": True}, zoom=3.2,
-                                center={"lat": -14.5, "lon": -52}, height=680, map_style="carto-positron",
-                                opacity=0.75, labels={"documentos": "Documentos"})
+                                hover_data={"codarea": False, "documentos": True, ORIGENS[0]: True,
+                                            ORIGENS[1]: True, "pct_citado": ":.0f"},
+                                zoom=3.2, center={"lat": -14.5, "lon": -52}, height=680, map_style="carto-positron",
+                                opacity=0.75, labels={"documentos": "Documentos", "pct_citado": "% citado no texto"})
         fig.update_layout(margin=dict(t=0, l=0, r=0, b=0))
         st.plotly_chart(fig, width="stretch")
-        st.caption("Cor = documentos que citam o estado (pelo nome do estado ou de um de seus municípios). "
-                   "Contornos: IBGE.")
-        tabela = e.sort_values("documentos", ascending=False)[["uf", "documentos"]]
-        chave, rotulo_col = "uf", "UF"
+        st.caption("Cor = documentos com local no estado. Passe o mouse para ver quantos vêm do texto e quantos "
+                   "da sede da unidade. Contornos: IBGE.")
+        tabela = e[["uf", "documentos"] + ORIGENS]
+        chave = "uf"
+    tabela = tabela.sort_values("documentos", ascending=False)
 
-    # Detalhe: documentos que citam o local escolhido --------------------------------
-    st.markdown("#### Locais mais citados")
+    # Detalhe: documentos do local escolhido ------------------------------------------
+    st.markdown("#### Locais com mais documentos")
     ev = st.dataframe(tabela, hide_index=True, width="stretch", on_select="rerun", selection_mode="single-row",
-                      key=f"mapa_loc_{escala}", height=320,
+                      key=f"mapa_loc_{escala}_{completar}", height=320,
                       column_config={"cod_ibge": None, "municipio": "Município", "uf": "UF",
                                      "documentos": "Documentos"})
     if not ev.selection.rows:
-        st.caption("Clique num local para ver os documentos que o citam.")
+        st.caption("Clique num local para ver os documentos.")
         return
     sel = tabela.iloc[ev.selection.rows[0]]
-    if escala == "municipio":
-        docs = q(f"""select distinct d.doc_uid, d.tipo_doc tipo, d.ano, d.titulo, d.unidade_id
-                     from doc_municipio dm join documento d using (doc_uid) {join_tema} {join_un}
-                     where dm.cod_ibge = ? and d.ano between ? and ? and list_contains(?, d.tipo_doc)
-                     {filtro_tema} {filtro_un} order by d.ano desc""", (sel.cod_ibge,) + params)
-        titulo = f"{sel.municipio}/{sel.uf}"
-    else:
-        docs = q(f"""with m as (select distinct doc_uid, uf from doc_municipio union select distinct doc_uid, uf from doc_estado)
-                     select distinct d.doc_uid, d.tipo_doc tipo, d.ano, d.titulo, d.unidade_id
-                     from m join documento d using (doc_uid) {join_tema} {join_un}
-                     where m.uf = ? and d.ano between ? and ? and list_contains(?, d.tipo_doc)
-                     {filtro_tema} {filtro_un} order by d.ano desc""", (sel.uf,) + params)
-        titulo = sel.uf
+    sub = loc[loc[chave] == sel[chave]].drop_duplicates("doc_uid")
+    docs = q("select doc_uid, tipo_doc tipo, ano, titulo, unidade_id from documento where list_contains(?, doc_uid)",
+             (sub.doc_uid.tolist(),)).merge(sub[["doc_uid", "origem"]], on="doc_uid")
     docs["unidade"] = docs.unidade_id.map(dados.rotulo_unidade)
     docs["tipo"] = docs.tipo.map({"projeto": "Projeto", "publicacao": "Publicação", "tecnologia": "Tecnologia"})
-    st.markdown(f"**Documentos que citam {titulo}** ({len(docs)})")
-    ui.tabela_navegavel(docs.drop(columns="unidade_id"), "doc", "doc_uid", f"mapa_docs_{escala}", altura=380)
+    titulo = f"{sel.municipio}/{sel.uf}" if escala == "municipio" else sel.uf
+    st.markdown(f"**Documentos em {titulo}** ({len(docs)})")
+    ui.tabela_navegavel(docs.sort_values("ano", ascending=False).drop(columns="unidade_id"), "doc", "doc_uid",
+                        f"mapa_docs_{escala}", altura=380, colunas={"origem": "Origem do local"})
 
 
 # ==================================================================================

@@ -162,9 +162,14 @@ list(
     saidas = c("data/processed/desafio.parquet", "data/processed/doc_desafio.parquet"),
     dep = list(embeddings, parquets_semantica, arq_ref_desafios)), format = "file"),
 
+  # Localização combinada: local citado; senão estado citado; senão sede da unidade (aproximação)
+  tar_target(parquets_localizacao, salvar_parquet(list(
+    doc_localizacao = montar_doc_localizacao(semantica_municipios, documento, documento_unidade, unidade_localizacao)
+  ), "data/processed"), format = "file"),
+
   tar_target(duckdb_app, construir_duckdb_app(c(parquets, parquets_semantica, semantica_similaridade, semantica_temas,
                                                 semantica_municipios, parquets_biomas, semantica_programacao,
-                                                semantica_produtos),
+                                                semantica_produtos, parquets_localizacao),
                                               "data/processed/observatorio_app.duckdb"),
              format = "file"),
   tar_target(auditoria, amostra_auditoria(doc_pessoa, pessoa, publicacao, projeto,
