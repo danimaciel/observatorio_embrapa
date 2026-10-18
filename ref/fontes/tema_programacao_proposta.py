@@ -1,6 +1,8 @@
 """Rascunho da tabela tema (BERTopic) → portfólio(s) e especificação(ões) do Plano Diretor 2024–2030.
 
-Status: PROPOSTA DO CLAUDE A REFERENDAR pela usuária (18/10/2026). Fontes dos critérios: caracterização oficial
+Status: proposta do Claude (18/10/2026) REFERENDADA pela usuária em 18/10/2026 (revisão em
+relatorios/tema_programacao_revisao.xlsx: 144 ok, 2 corrigir); T031 Seringueira marcada "corrigir" sem a correção
+registrada — pendente de confirmação. Fontes dos critérios: caracterização oficial
 dos portfólios (ref/portfolios.csv, Portal Embrapa) e especificações oficiais (ref/objetivos_estrategicos.csv,
 Plano Diretor). A ligação documento → programação é herdada do tema do documento (doc_tema).
 
@@ -116,7 +118,7 @@ P = {
     "T045": ("biodiversidade", "biorrevolucao", "O02.6", "", "sociobio", "duvida",
              "recursos genéticos: especificação O02.6, mas nenhum portfólio os cita explicitamente"),
     "T076": ("biodiversidade", "", "O05.1", "", "sociobio", "alta", ""),
-    "T016": ("prosur", "biodiversidade", "O01.1", "", "producao", "media", "maracujá cultivado e nativo"),
+    "T016": ("prosur", "biodiversidade", "O01.1", "O04.7", "producao", "media", "maracujá cultivado e nativo"),
     "T057": ("biodiversidade", "prosur", "O05.3", "", "sociobio", "alta", ""),
     "T050": ("biodiversidade", "", "O05.3", "", "sociobio", "alta", ""),
     "T053": ("biodiversidade", "prosur", "O05.3", "", "sociobio", "alta", ""),
@@ -163,7 +165,7 @@ P = {
     "T088": ("prosur", "ecoclima", "O01.1", "O02.3", "producao", "alta", ""),
     "T118": ("biorrevolucao", "ecoclima", "O02.2", "O01.2", "biotec", "media", "adaptação à seca"),
     "T089": ("prosur", "everde", "O01.1", "", "producao", "alta", ""),
-    "T142": ("biorrevolucao", "prosur", "O01.2", "", "biotec", "media", ""),
+    "T142": ("biorrevolucao", "prosur", "O01.2", "", "biotec", "media", "revisão: especificação 2 = outra (não listada)"),
     # M17 Fruticultura
     "T008": ("bioeficiencia", "prosur", "O04.6", "O01.1", "fitossanidade", "media", "termos dominados por sigatoka"),
     "T048": ("prosur", "", "O01.1", "", "producao", "alta", ""),
@@ -191,9 +193,9 @@ P = {
     # M21 Pastagens e forrageiras
     "T067": ("prosur", "", "O01.1", "", "producao", "alta", ""),
     "T018": ("prosur", "", "O01.1", "", "producao", "alta", ""),
-    "T094": ("prosur", "biodiversidade", "O01.1", "", "producao", "media", "forrageiras nativas do Cerrado"),
+    "T094": ("prosur", "biodiversidade", "O01.1", "", "producao", "media", "forrageiras nativas do Cerrado; revisão: especificação 2 = outra (não listada)"),
     "T042": ("prosur", "", "O01.1", "", "producao", "alta", ""),
-    "T120": ("biorrevolucao", "prosur", "O01.2", "", "biotec", "media", "melhoramento e apomixia"),
+    "T120": ("biorrevolucao", "prosur", "O01.2", "O02.6", "biotec", "media", "melhoramento e apomixia"),
     "T107": ("prosur", "biodiversidade", "O01.2", "O02.6", "melhoramento", "media", "germoplasma nativo"),
     # M22 Reprodução e melhoramento genético animal
     "T021": ("prosur", "biorrevolucao", "O01.2", "", "melhoramento", "alta", "biotecnologias da reprodução"),
@@ -208,6 +210,9 @@ P = {
     "T137": ("prosur", "ecoclima", "O01.1", "", "producao", "alta", "uso eficiente da água"),
     "T066": ("ecoclima", "agroecois", "O02.7", "O06.3", "recursos_nat", "alta", "convivência com a seca"),
 }
+
+
+PENDENTES = {"T031"}     # marcada "corrigir" na revisão sem a correção registrada
 
 
 def main() -> None:
@@ -234,7 +239,8 @@ def main() -> None:
         rows.append(dict(
             tema_id=tid, tema=t2.rotulo[tid], macrotema=macro[t2.pai_id[tid]], n_documentos=int(n.get(tid, 0)),
             portfolio_1=p1, portfolio_2=p2, especificacao_1=e1, especificacao_2=e2, criterio=crit,
-            certeza=certeza, nota=nota, status="proposta a referendar"))
+            certeza=certeza, nota=nota,
+            status="corrigir: a confirmar" if tid in PENDENTES else "referendada (18/10/2026)"))
     x = pd.DataFrame(rows).sort_values(["macrotema", "n_documentos"], ascending=[True, False])
     x.to_csv(RAIZ / "ref" / "tema_programacao.csv", index=False, encoding="utf-8")
 
@@ -245,6 +251,8 @@ def main() -> None:
                  especificacao_1=x.especificacao_1.map(nomee), especificacao_2=x.especificacao_2.map(nomee),
                  exemplos=x.tema_id.map(ex), decisao="", correcao="", comentario="")
     saida = RAIZ / "relatorios" / "tema_programacao_revisao.xlsx"
+    if saida.exists():          # não sobrescreve a planilha já revisada pela usuária
+        saida = saida.with_name("tema_programacao_revisao_v2.xlsx")
     with pd.ExcelWriter(saida, engine="openpyxl") as w:
         r.drop(columns=["status"]).to_excel(w, sheet_name="Temas", index=False)
         port.reset_index()[["portfolio_id", "nome_portal", "caracterizacao"]].to_excel(w, sheet_name="Portfólios",

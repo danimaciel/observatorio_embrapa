@@ -167,9 +167,22 @@ list(
     doc_localizacao = montar_doc_localizacao(semantica_municipios, documento, documento_unidade, unidade_localizacao)
   ), "data/processed"), format = "file"),
 
+  # Programação oficial: objetivos/especificações (Plano Diretor), portfólios (Portal) e tema → programação
+  # (tabela referendada pela usuária em 18/10/2026). Os documentos herdam pelo tema (doc_tema).
+  tar_target(arq_ref_tema_programacao, "ref/tema_programacao.csv", format = "file"),
+  tar_target(arq_ref_portfolios, "ref/portfolios.csv", format = "file"),
+  tar_target(arq_ref_objetivos, "ref/objetivos_estrategicos.csv", format = "file"),
+  tar_target(parquets_programacao_oficial, salvar_parquet(list(
+    tema_programacao = readr::read_csv(arq_ref_tema_programacao, col_types = readr::cols(.default = "c",
+                                                                                          n_documentos = "i")),
+    portfolio = readr::read_csv(arq_ref_portfolios, col_types = readr::cols(.default = "c")),
+    especificacao = readr::read_csv(arq_ref_objetivos, col_types = readr::cols(.default = "c"))
+  ), "data/processed"), format = "file"),
+
   tar_target(duckdb_app, construir_duckdb_app(c(parquets, parquets_semantica, semantica_similaridade, semantica_temas,
                                                 semantica_municipios, parquets_biomas, semantica_programacao,
-                                                semantica_produtos, parquets_localizacao),
+                                                semantica_produtos, parquets_localizacao,
+                                                parquets_programacao_oficial),
                                               "data/processed/observatorio_app.duckdb"),
              format = "file"),
   tar_target(auditoria, amostra_auditoria(doc_pessoa, pessoa, publicacao, projeto,

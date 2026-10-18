@@ -56,7 +56,11 @@ TABELAS_APP <- list(
   desafio = "desafio_id, portfolio, objetivo_id, objetivo, meta_id, meta, ods_num, ods, desafio",
   doc_desafio = "*",
   # localização combinada (fonte: municipio_citado, estado_citado ou sede_unidade)
-  doc_localizacao = "*"
+  doc_localizacao = "*",
+  # programação oficial (objetivos/especificações, portfólios, tema → programação)
+  tema_programacao = "*",
+  portfolio = "portfolio_id, portfolio, nome_portal, caracterizacao, n_desafios, fonte",
+  especificacao = "*"
 )
 
 construir_duckdb_app <- function(parquets, db_path) {

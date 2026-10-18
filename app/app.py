@@ -11,9 +11,11 @@ st.set_page_config(page_title="Observatório de Pesquisa da Embrapa", page_icon=
                    layout="wide")
 
 paginas = {
+    "Início": [
+        st.Page("paginas/capa.py", title="Capa", icon=":material/home:", url_path="capa", default=True),
+    ],
     "Visão institucional": [
-        st.Page("paginas/embrapa.py", title="Embrapa", icon=":material/account_balance:",
-                url_path="embrapa", default=True),
+        st.Page("paginas/embrapa.py", title="Embrapa", icon=":material/account_balance:", url_path="embrapa"),
         st.Page("paginas/unidades.py", title="Unidades", icon=":material/apartment:", url_path="unidades"),
         st.Page("paginas/redes.py", title="Redes", icon=":material/hub:", url_path="redes"),
         st.Page("paginas/mapa.py", title="Mapa", icon=":material/map:", url_path="mapa"),
