@@ -1,6 +1,40 @@
 # Estado do projeto · Observatório de Pesquisa da Embrapa
 
-*Atualizado em 2026-10-17. Atualizar este arquivo ao fim de cada sessão de trabalho.*
+*Atualizado em 2026-10-18. Atualizar este arquivo ao fim de cada sessão de trabalho.*
+
+## Frente estratégica: capa e programação (18/10/2026, em andamento)
+
+- **Pedido da usuária:** capa com "Visão geral" e "Visão por programação"; cards com temas e produtos; mapas mais
+  bonitos; todo o acervo organizado por objetivos estratégicos **e** por portfólios, com duas leituras lado a lado
+  (desde 2024 e todo o acervo).
+- **Referências oficiais prontas:** `ref/objetivos_estrategicos.csv` (7 objetivos finalísticos, 38 especificações,
+  Plano Diretor 2024–2030, p. 28–34) e `ref/portfolios.csv` (9 portfólios, Portal Embrapa, acesso 18/10/2026);
+  gerador `ref/fontes/gerar_ref_programacao.R`. O Plano Diretor não caracteriza portfólios; a ligação
+  portfólio × objetivo vem dos desafios (planilha reenviada em 18/10 é idêntica à anterior).
+- **Mapa combinado (feito, commit f82c405):** `doc_localizacao` = município citado → estado citado → sede da
+  unidade (aproximação). Cobre 99,4% (15,0% município, 12,9% estado, 71,5% sede). Banco `dados-2026-10`
+  republicado; o app online só mostra a visão nova depois da troca da `tag`.
+- **Teste de classificação direta (18/10, `pipeline/py/programacao_oficial.py`, fora do pipeline):** documento ×
+  textos oficiais (38 especificações, 9 portfólios) por SBERT. Não serve: 5 variantes dão ~20% de concordância com
+  a via dos desafios (acaso ≈ 11%) e distribuição implausível; nos temas de cultura/praga a similaridade com os
+  textos dos portfólios é ≈ 0 (os textos não descrevem cadeias). Proposta à usuária: **tabela tema → portfólio(s)
+  e especificação(ões)** (146 temas BERTopic), rascunho do Claude (status: proposta a referendar) validado por ela.
+- **Rascunho tema → programação (18/10):** `ref/tema_programacao.csv` (146 temas → portfólio 1/2 e especificação
+  1/2, critério, certeza, nota; status "proposta a referendar"), gerador `ref/fontes/tema_programacao_proposta.py`.
+  Certeza: 118 alta, 22 média, 6 dúvida. Revisão da usuária em `relatorios/tema_programacao_revisao.xlsx`
+  (colunas decisao/correcao/comentario). Pelo portfólio principal, Sistemas de Produção concentra 82.580 docs (44,5%).
+- **Revisão aplicada (18/10):** 146 temas referendados; T031 Seringueira corrigida pela usuária → Economia da
+  Biodiversidade, O05.1 (moveu 988 docs de Sistemas de Produção; 4 desde 2024).
+- **Capa nova (página inicial, `app/paginas/capa.py`):** Visão geral (números, mapa por estado combinado colorível por
+  macrotema ou produto, cards de 12 macrotemas e 12 produtos com minigráfico) e Visão por programação (cards dos 7
+  objetivos ou 9 portfólios com "todo o acervo" × "desde 2024", secundário, produtos; detalhe com mapa,
+  especificações, produtos, temas, unidades, documentos). Banco com `tema_programacao`, `portfolio`, `especificacao`.
+- **Nota metodológica:** `documentacao/Capa_e_programacao_2026-10-18.{md,docx}`.
+- **Ajustes da capa (18/10, commit af09a55):** filtros Macrotema → Produto (produtos com ≥ 0,5% dos docs do
+  macrotema, ordem alfabética sem acento); cards dos grandes temas abrem `temas?macro=M##`. Tema T127 renomeado
+  "Mamão e mamona" (BERTopic juntou os dois: 368 de 810 docs são de mamona; produtos marcam certo).
+- **Pendente da usuária:** trocar `tag` para `dados-2026-10` nos secrets e Reboot (capa e
+  mapa combinado só aparecem online depois disso); token vence 28/10.
 
 ## Rodada de outubro e camadas novas (17/10/2026)
 
