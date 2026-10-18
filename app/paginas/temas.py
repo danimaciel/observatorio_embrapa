@@ -33,7 +33,11 @@ def base_temas(a0: int, a1: int) -> pd.DataFrame:
 base = base_temas(a0, a1)
 c1, c2 = st.columns(2)
 with c1:
-    macro = st.selectbox("Macrotema", macro_lista.tema_id.tolist(), index=None,
+    url_macro = st.query_params.get("macro")
+    if url_macro in set(macro_lista.tema_id) and st.session_state.get("_url_macro") != url_macro:
+        st.session_state["temas_macro"] = url_macro      # link vindo da capa
+        st.session_state["_url_macro"] = url_macro
+    macro = st.selectbox("Macrotema", macro_lista.tema_id.tolist(), index=None, key="temas_macro",
                          format_func=lambda m: f"{dados.rotulo_tema(m)} ({tm.set_index('tema_id').n_total[m]:,})"
                          .replace(",", "."), placeholder="Todos os macrotemas")
 with c2:

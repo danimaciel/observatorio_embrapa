@@ -44,6 +44,10 @@ st.markdown("""
 .card .duas small {display: block; margin-top: .05rem;}
 .chip {display: inline-block; background: #EEF4EF; color: #1F4D27; border-radius: 999px; padding: .08rem .55rem;
        font-size: .74rem; margin: 0 .25rem .25rem 0;}
+a.cardlink {text-decoration: none; color: inherit; display: block; height: 100%;}
+a.cardlink .card {transition: box-shadow .15s, border-color .15s;}
+a.cardlink:hover .card {border-color: #2E7D32; box-shadow: 0 3px 10px rgba(46,125,50,.18);}
+.card .seta {color: #2E7D32; font-weight: 400;}
 .secao {font-size: 1.25rem; font-weight: 700; color: #1F2A24; margin: 1.3rem 0 .5rem;}
 </style>""", unsafe_allow_html=True)
 
@@ -129,23 +133,35 @@ def visao_geral() -> None:
     macros = tm[tm.nivel == 1].sort_values("n_total", ascending=False)
     prods = q("""select produto, count(distinct doc_uid) n from doc_produto where forca = 'principal'
                  group by 1 order by 2 desc""")
-    c1, c2, c3 = st.columns([2, 3, 2])
-    recorte = c1.radio("Colorir por", ["tudo", "tema", "produto"], horizontal=True, key="capa_recorte",
-                       format_func={"tudo": "Toda a produção", "tema": "Macrotema", "produto": "Produto"}.get)
-    escolha = None
-    if recorte == "tema":
-        escolha = c2.selectbox("Macrotema", macros.tema_id.tolist(), format_func=dados.rotulo_tema, key="capa_macro")
-    elif recorte == "produto":
-        escolha = c2.selectbox("Produto", prods.produto.tolist(), key="capa_prod")
-    completar = c3.toggle("Completar com a sede da unidade", value=True, key="capa_completar")
-    if recorte == "tema":
-        where, params = "d.doc_uid in (select doc_uid from doc_tema where macro_id = ?)", (escolha,)
-    elif recorte == "produto":
-        where, params = ("d.doc_uid in (select doc_uid from doc_produto where forca = 'principal' and produto = ?)",
-                         (escolha,))
+    # Filtros encadeados: o macrotema restringe a lista de produtos (só os que aparecem nele), em ordem alfabética
+    c1, c2, c3 = st.columns([3, 3, 2])
+    macro = c1.selectbox("Macrotema", macros.tema_id.tolist(), index=None, key="capa_macro",
+                         format_func=dados.rotulo_tema, placeholder="Todos os macrotemas")
+    if macro:
+        pm = q("""select p.produto, count(distinct p.doc_uid) n from doc_produto p join doc_tema t using (doc_uid)
+                  where p.forca = 'principal' and t.macro_id = ? group by 1""", (macro,))
+        # só produtos com peso no macrotema (>= 0,5% dos documentos dele, mínimo 5): evita menções marginais
+        n_macro = int(macros.set_index("tema_id").n_total[macro])
+        pm = pm[pm.n >= max(5, 0.005 * n_macro)]
     else:
-        where, params = "true", ()
-    mapa_estados(where, params, completar, chave="geral")
+        pm = prods
+    sem_acento = lambda s: s.str.normalize("NFKD").str.encode("ascii", "ignore").str.decode("ascii").str.lower()
+    pm = pm.sort_values("produto", key=sem_acento)
+    n_prod = dict(zip(pm.produto, pm.n))
+    if st.session_state.get("capa_prod") not in n_prod:      # produto fora do macrotema escolhido
+        st.session_state["capa_prod"] = None
+    produto = c2.selectbox("Produto", list(n_prod), index=None, key="capa_prod",
+                           format_func=lambda p: f"{p} ({fmt(n_prod[p])})",
+                           placeholder="Todos os produtos" + (" deste macrotema" if macro else ""))
+    completar = c3.toggle("Completar com a sede da unidade", value=True, key="capa_completar")
+    cond, params = ["true"], ()
+    if macro:
+        cond.append("d.doc_uid in (select doc_uid from doc_tema where macro_id = ?)")
+        params += (macro,)
+    if produto:
+        cond.append("d.doc_uid in (select doc_uid from doc_produto where forca = 'principal' and produto = ?)")
+        params += (produto,)
+    mapa_estados(" and ".join(cond), params, completar, chave="geral")
 
     # Cards: macrotemas e produtos -----------------------------------------------------
     serie_tema = q(f"""select t.macro_id, d.ano, count(*) n from doc_tema t join documento d using (doc_uid)
@@ -155,12 +171,13 @@ def visao_geral() -> None:
     for r in macros.head(12).itertuples():
         s = serie_tema[serie_tema.macro_id == r.tema_id].set_index("ano").n
         filhos = tm[(tm.nivel == 2) & (tm.pai_id == r.tema_id)].sort_values("n_total", ascending=False).rotulo.head(3)
-        cards.append(f"""<div class="card"><h4>{html.escape(r.rotulo)}</h4>
+        cards.append(f"""<a class="cardlink" href="temas?macro={r.tema_id}" target="_self"><div class="card">
+            <h4>{html.escape(r.rotulo)} <span class="seta">→</span></h4>
             <div class="num">{fmt(r.n_total)} <small>documentos · {100 * r.n_total / n_doc:.1f}% do acervo</small></div>
-            {sparkline(s)}<div>{''.join(f'<span class="chip">{html.escape(f)}</span>' for f in filhos)}</div></div>""")
+            {sparkline(s)}<div>{''.join(f'<span class="chip">{html.escape(f)}</span>' for f in filhos)}</div></div></a>""")
     grade(cards, 4)
     st.caption("Temas identificados por similaridade semântica (SBERT + BERTopic). Minigráfico: documentos por ano "
-               f"desde {ANO_MIN}. Detalhes na página Temas.")
+               f"desde {ANO_MIN}. **Clique num card** para abrir o macrotema na página Temas.")
 
     st.markdown('<div class="secao">Produtos agropecuários</div>', unsafe_allow_html=True)
     serie_prod = q(f"""select p.produto, d.ano, count(distinct p.doc_uid) n
