@@ -115,11 +115,17 @@ visao = st.segmented_control("Visão", ["geral", "programacao"], default="geral"
 
 # ==================================================================================
 def visao_geral() -> None:
-    tot = q("select tipo_doc, count(*) n from documento group by 1").set_index("tipo_doc").n
-    n_doc = int(tot.sum())
-    n_un = q("select count(distinct unidade_id) n from documento_unidade").n.iloc[0]
-    n_prod = q("select count(distinct doc_uid) n from doc_produto where forca = 'principal'").n.iloc[0]
-    n_loc = q("select count(distinct doc_uid) n from doc_localizacao where fonte <> 'sede_unidade'").n.iloc[0]
+    # Tudo na Visão geral segue o período da barra lateral, como nas demais páginas (padrão: acervo completo).
+    a0, a1 = dados.periodo()
+    per, pp = "d.ano between ? and ?", (a0, a1)
+    tot = q(f"select tipo_doc, count(*) n from documento d where {per} group by 1", pp).set_index("tipo_doc").n
+    n_doc = max(int(tot.sum()), 1)
+    n_un = q(f"""select count(distinct du.unidade_id) n from documento_unidade du join documento d using (doc_uid)
+                 where {per}""", pp).n.iloc[0]
+    n_prod = q(f"""select count(distinct p.doc_uid) n from doc_produto p join documento d using (doc_uid)
+                   where p.forca = 'principal' and {per}""", pp).n.iloc[0]
+    n_loc = q(f"""select count(distinct l.doc_uid) n from doc_localizacao l join documento d using (doc_uid)
+                  where l.fonte <> 'sede_unidade' and {per}""", pp).n.iloc[0]
     kpis = [(fmt(tot.get("publicacao", 0)), "publicações (obras)"), (fmt(tot.get("projeto", 0)), "projetos"),
             (fmt(tot.get("tecnologia", 0)), "soluções tecnológicas"), (fmt(n_un), "unidades com produção"),
             (f"{100 * n_prod / n_doc:.0f}%", "com produto agropecuário"),
@@ -127,34 +133,41 @@ def visao_geral() -> None:
     for col, (v, r) in zip(st.columns(len(kpis)), kpis):
         col.markdown(f'<div class="kpi"><div class="v">{v}</div><div class="r">{r}</div></div>',
                      unsafe_allow_html=True)
+    b0, b1 = dados.faixa_anos()
+    st.caption(f"Período: **{a0}–{a1}**" + (" (acervo completo)" if (a0, a1) == (b0, b1) else
+               f" · acervo completo: {b0}–{b1}") + ". O período é o da barra lateral e vale para todas as páginas.")
 
     st.markdown('<div class="secao">Onde está a produção</div>', unsafe_allow_html=True)
     tm = dados.temas()
-    macros = tm[tm.nivel == 1].sort_values("n_total", ascending=False)
-    prods = q("""select produto, count(distinct doc_uid) n from doc_produto where forca = 'principal'
-                 group by 1 order by 2 desc""")
+    n_mac = q(f"""select t.macro_id tema_id, count(*) n_per from doc_tema t join documento d using (doc_uid)
+                  where {per} group by 1""", pp)
+    macros = tm[tm.nivel == 1].merge(n_mac, on="tema_id", how="left").fillna({"n_per": 0}) \
+        .sort_values("n_per", ascending=False)
+    prods = q(f"""select p.produto, count(distinct p.doc_uid) n from doc_produto p join documento d using (doc_uid)
+                  where p.forca = 'principal' and {per} group by 1 order by 2 desc""", pp)
     # Filtros encadeados: o macrotema restringe a lista de produtos (só os que aparecem nele), em ordem alfabética
     c1, c2, c3 = st.columns([3, 3, 2])
     macro = c1.selectbox("Macrotema", macros.tema_id.tolist(), index=None, key="capa_macro",
                          format_func=dados.rotulo_tema, placeholder="Todos os macrotemas")
     if macro:
-        pm = q("""select p.produto, count(distinct p.doc_uid) n from doc_produto p join doc_tema t using (doc_uid)
-                  where p.forca = 'principal' and t.macro_id = ? group by 1""", (macro,))
+        pm = q(f"""select p.produto, count(distinct p.doc_uid) n from doc_produto p join doc_tema t using (doc_uid)
+                   join documento d using (doc_uid)
+                   where p.forca = 'principal' and t.macro_id = ? and {per} group by 1""", (macro,) + pp)
         # só produtos com peso no macrotema (>= 0,5% dos documentos dele, mínimo 5): evita menções marginais
-        n_macro = int(macros.set_index("tema_id").n_total[macro])
+        n_macro = int(macros.set_index("tema_id").n_per[macro])
         pm = pm[pm.n >= max(5, 0.005 * n_macro)]
     else:
         pm = prods
     sem_acento = lambda s: s.str.normalize("NFKD").str.encode("ascii", "ignore").str.decode("ascii").str.lower()
     pm = pm.sort_values("produto", key=sem_acento)
-    n_prod = dict(zip(pm.produto, pm.n))
-    if st.session_state.get("capa_prod") not in n_prod:      # produto fora do macrotema escolhido
+    opcoes_prod = dict(zip(pm.produto, pm.n))   # produto → documentos (para o seletor)
+    if st.session_state.get("capa_prod") not in opcoes_prod:      # produto fora do macrotema escolhido
         st.session_state["capa_prod"] = None
-    produto = c2.selectbox("Produto", list(n_prod), index=None, key="capa_prod",
-                           format_func=lambda p: f"{p} ({fmt(n_prod[p])})",
+    produto = c2.selectbox("Produto", list(opcoes_prod), index=None, key="capa_prod",
+                           format_func=lambda p: f"{p} ({fmt(opcoes_prod[p])})",
                            placeholder="Todos os produtos" + (" deste macrotema" if macro else ""))
     completar = c3.toggle("Completar com a sede da unidade", value=True, key="capa_completar")
-    cond, params = ["true"], ()
+    cond, params = [per], pp
     if macro:
         cond.append("d.doc_uid in (select doc_uid from doc_tema where macro_id = ?)")
         params += (macro,)
@@ -171,9 +184,10 @@ def visao_geral() -> None:
     for r in macros.head(12).itertuples():
         s = serie_tema[serie_tema.macro_id == r.tema_id].set_index("ano").n
         filhos = tm[(tm.nivel == 2) & (tm.pai_id == r.tema_id)].sort_values("n_total", ascending=False).rotulo.head(3)
+        n_t = int(r.n_per)
         cards.append(f"""<a class="cardlink" href="temas?macro={r.tema_id}" target="_self"><div class="card">
             <h4>{html.escape(r.rotulo)} <span class="seta">→</span></h4>
-            <div class="num">{fmt(r.n_total)} <small>documentos · {100 * r.n_total / n_doc:.1f}% do acervo</small></div>
+            <div class="num">{fmt(n_t)} <small>documentos · {100 * n_t / n_doc:.1f}% do período</small></div>
             {sparkline(s)}<div>{''.join(f'<span class="chip">{html.escape(f)}</span>' for f in filhos)}</div></div></a>""")
     grade(cards, 4)
     st.caption("Temas identificados por similaridade semântica (SBERT + BERTopic). Minigráfico: documentos por ano "
@@ -220,6 +234,8 @@ def visao_programacao() -> None:
         st.info("A tabela tema → programação ainda não está neste banco.")
         return
     base = base_programacao()
+    st.caption("Esta visão não usa o período da barra lateral: mostra sempre duas leituras fixas, **todo o acervo** "
+               "e **desde 2024**.")
     port = q("select * from portfolio")
     esp = q("select * from especificacao")
     obj = esp.drop_duplicates("objetivo_id")[["objetivo_id", "objetivo", "enunciado"]]

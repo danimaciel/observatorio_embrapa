@@ -136,7 +136,7 @@ def q(sql: str, params: tuple = ()) -> pd.DataFrame:
 # Filtros globais (definidos na barra lateral em app.py) -----------------------
 
 def periodo() -> tuple[int, int]:
-    return st.session_state.get("periodo", (1990, 2026))
+    return st.session_state.get("periodo", faixa_anos())
 
 
 # Consultas de referência ------------------------------------------------------
@@ -259,5 +259,7 @@ def resumo_temas(doc_uids, n: int = 3) -> str:
 
 @st.cache_data(show_spinner=False)
 def faixa_anos() -> tuple[int, int]:
-    r = q("select min(ano) a0, max(ano) a1 from documento where ano >= 1970")
+    """Primeiro e último ano do acervo inteiro (sem corte): é também o período padrão do app, para que todas as
+    páginas, a capa inclusive, mostrem os mesmos totais ao abrir."""
+    r = q("select min(ano) a0, max(ano) a1 from documento")
     return int(r.a0[0]), int(r.a1[0])
