@@ -29,6 +29,8 @@ roteiro de atualização mensal: `README.md`.
 - **Documentar sempre**, com `.docx` além do `.md` quando for documento para outras pessoas
   (`documentacao/`, gerador em `documentacao/ferramentas/`).
 - Não re-sortear amostras já rotuladas; rótulos ficam ligados a `doc_uid`.
+- **Um único banco** (`observatorio_app.duckdb`) e **um único período** em todo o app (padrão: acervo completo).
+  Ao mexer em contagens, rodar `python -m pytest tests/app -q` e `Rscript tests/conferir_numeros.R`.
 - SBERT nunca leva stopwords (só os rótulos do BERTopic).
 
 ## Camadas de produto e localização (desde 17/10/2026)
@@ -55,7 +57,8 @@ roteiro de atualização mensal: `README.md`.
 - Atualizar dados: `tar_make()` → `gh release create dados-AAAA-MM data/processed/observatorio_app.duckdb
   --repo danimaciel/observatorio_embrapa_dados` → trocar `tag` nos secrets → Reboot.
 - O token fine-grained `observatorio_embrapa` (lido pelos secrets deste app e do Observatório das Florestas)
-  **expira em 28/10/2026**: regenerar e atualizar os secrets dos dois apps.
+  foi regenerado (22/10/2026). Quando vencer de novo: regenerar e trocar a linha `token` nos Secrets dos dois
+  apps. **Antes de pedir isso, perguntar se já foi feito.**
 
 ## Skills do projeto (`.claude/skills/`)
 
