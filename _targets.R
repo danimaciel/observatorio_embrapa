@@ -147,13 +147,17 @@ list(
     saidas = "data/processed/doc_produto.parquet",
     dep = list(parquets_semantica, arq_ref_produtos)), format = "file"),
 
-  # Arquivo público de resultados (produtos + localização por documento) para os projetos iAgro;
+  # Arquivo público de resultados (produtos, localização e temas por documento; quem trabalha com cada
+  # produto e tema) para os projetos iAgro;
   # publicado como release "enriquecimento-AAAA-MM" em danimaciel/observatorio_embrapa
   tar_target(enriquecimento, rodar_python(
     "pipeline/py/enriquecimento.py",
     saidas = c("data/processed/enriquecimento.csv.gz", "data/processed/registro_obra.csv.gz",
-               "data/processed/produtos.csv"),
-    dep = list(semantica_produtos, semantica_municipios, parquets_biomas)), format = "file"),
+               "data/processed/produtos.csv", "data/processed/temas.csv", "data/processed/pessoas.csv.gz",
+               "data/processed/pessoa_produto.csv.gz", "data/processed/pessoa_tema.csv.gz",
+               "data/processed/evidencias.csv.gz"),
+    dep = list(parquets, parquets_semantica, semantica_produtos, semantica_municipios, parquets_biomas,
+               semantica_temas)), format = "file"),
 
   # Programação da Embrapa: aderência aos Desafios para Inovação (conteúdo desde 2024)
   tar_target(arq_ref_desafios, "ref/programacao_desafios.csv", format = "file"),
