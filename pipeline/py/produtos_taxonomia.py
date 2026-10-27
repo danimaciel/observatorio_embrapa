@@ -162,8 +162,8 @@ def main():
         w.writerow(["produto_id", "produto", "grupo_atividade", "categoria_ampla", "fonte_ibge", "termos",
                     "cientifico", "contexto", "excluir", "status"])
         for pid, nome, grupo, cat, fontes, termos, cient, ctx in P:
-            status = "categoria IBGE oficial; termos e agrupamento: proposta Claude a referendar" if fontes \
-                else "categoria ampla: proposta Claude a referendar"
+            status = "categoria IBGE oficial; termos e agrupamento: proposta metodológica, em validação" if fontes \
+                else "categoria ampla: proposta metodológica, em validação"
             w.writerow([pid, nome, grupo, cat, " | ".join(fontes), termos, cient, ctx, EXCLUIR.get(pid, ""), status])
     print(f"{len(P)} produtos em {saida}")
 

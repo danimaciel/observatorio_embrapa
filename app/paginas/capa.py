@@ -221,7 +221,7 @@ def grade(cards: list[str], por_linha: int) -> None:
 # ==================================================================================
 @st.cache_data(show_spinner=False)
 def base_programacao() -> pd.DataFrame:
-    """Documento → objetivo, especificação e portfólios, herdados do tema (tabela referendada)."""
+    """Documento → objetivo, especificação e portfólios, herdados do tema (tabela validada)."""
     return q(f"""select dt.doc_uid, d.tipo_doc, d.ano, {DESDE_2024} desde_2024,
                         tp.portfolio_1, tp.portfolio_2, tp.especificacao_1, tp.especificacao_2,
                         substr(tp.especificacao_1, 1, 3) objetivo_1, substr(tp.especificacao_2, 1, 3) objetivo_2
@@ -244,7 +244,7 @@ def visao_programacao() -> None:
                                 format_func={"objetivo": "Objetivos estratégicos", "portfolio": "Portfólios"}.get) \
         or "objetivo"
     c2.caption("Cada documento herda objetivo, especificação e portfólios do seu **tema** (tabela tema → programação "
-               "referendada em 18/10/2026). **Todo o acervo** = aderência de conteúdo à agenda atual; **desde 2024** "
+               "validada em 18/10/2026). **Todo o acervo** = aderência de conteúdo à agenda atual; **desde 2024** "
                "= produção sob a programação vigente. Temas de gestão institucional ficam de fora (transversais).")
 
     col1, col2 = ("objetivo_1", "objetivo_2") if eixo == "objetivo" else ("portfolio_1", "portfolio_2")

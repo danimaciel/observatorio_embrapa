@@ -4,12 +4,12 @@
 
 ## Pessoas e temas no arquivo público (27/10/2026, PR aberto, falta rodar)
 
-- **Pedido da usuária (Rede iAgro):** mostrar "quem trabalha com isso" ao lado do kit de leitura, com nomes
-  tirados das publicações e projetos (dado pessoal já público; aprovado por ela em 27/10).
+- **Objetivo (Rede iAgro):** mostrar "quem trabalha com isso" ao lado do kit de leitura, com nomes
+  tirados das publicações e projetos (dado pessoal já público nas publicações).
 - **`pipeline/py/enriquecimento.py`** passa a gravar também `temas.csv`, `pessoas.csv.gz`,
   `pessoa_produto.csv.gz`, `pessoa_tema.csv.gz` e `evidencias.csv.gz`; `enriquecimento.csv.gz` ganha `tema` e
   `macrotema` (por isso passa a ter quase todos os documentos, não só os com produto ou local).
-- **Critério (referendado pela usuária em 27/10):** só vínculos A/B/M e pessoas com unidade; peso projeto liderado 3, solução
+- **Critério (versão de 27/10):** só vínculos A/B/M e pessoas com unidade; peso projeto liderado 3, solução
   2 (via `pessoa_tecnologia`), publicação/participação 1, metade para documentos com mais de 10 anos; entra quem
   tem ≥ 3 documentos no produto/tema, 1 deles recente; até 5 evidências. Id público = hash do `pessoa_id`
   (`PS` + 10 hex); sem matrícula, contato ou id interno.
@@ -18,7 +18,7 @@
 
 ## Frente estratégica: capa e programação (18/10/2026, em andamento)
 
-- **Pedido da usuária:** capa com "Visão geral" e "Visão por programação"; cards com temas e produtos; mapas mais
+- **Objetivo:** capa com "Visão geral" e "Visão por programação"; cards com temas e produtos; mapas mais
   bonitos; todo o acervo organizado por objetivos estratégicos **e** por portfólios, com duas leituras lado a lado
   (desde 2024 e todo o acervo).
 - **Referências oficiais prontas:** `ref/objetivos_estrategicos.csv` (7 objetivos finalísticos, 38 especificações,
@@ -31,13 +31,13 @@
 - **Teste de classificação direta (18/10, `pipeline/py/programacao_oficial.py`, fora do pipeline):** documento ×
   textos oficiais (38 especificações, 9 portfólios) por SBERT. Não serve: 5 variantes dão ~20% de concordância com
   a via dos desafios (acaso ≈ 11%) e distribuição implausível; nos temas de cultura/praga a similaridade com os
-  textos dos portfólios é ≈ 0 (os textos não descrevem cadeias). Proposta à usuária: **tabela tema → portfólio(s)
-  e especificação(ões)** (146 temas BERTopic), rascunho do Claude (status: proposta a referendar) validado por ela.
+  textos dos portfólios é ≈ 0 (os textos não descrevem cadeias). Proposta: **tabela tema → portfólio(s)
+  e especificação(ões)** (146 temas BERTopic), rascunho (status: proposta metodológica) validado em revisão.
 - **Rascunho tema → programação (18/10):** `ref/tema_programacao.csv` (146 temas → portfólio 1/2 e especificação
-  1/2, critério, certeza, nota; status "proposta a referendar"), gerador `ref/fontes/tema_programacao_proposta.py`.
-  Certeza: 118 alta, 22 média, 6 dúvida. Revisão da usuária em `relatorios/tema_programacao_revisao.xlsx`
+  1/2, critério, certeza, nota; status "proposta metodológica"), gerador `ref/fontes/tema_programacao_proposta.py`.
+  Certeza: 118 alta, 22 média, 6 dúvida. Revisão em `relatorios/tema_programacao_revisao.xlsx`
   (colunas decisao/correcao/comentario). Pelo portfólio principal, Sistemas de Produção concentra 82.580 docs (44,5%).
-- **Revisão aplicada (18/10):** 146 temas referendados; T031 Seringueira corrigida pela usuária → Economia da
+- **Revisão aplicada (18/10):** 146 temas validados; T031 Seringueira corrigida → Economia da
   Biodiversidade, O05.1 (moveu 988 docs de Sistemas de Produção; 4 desde 2024).
 - **Capa nova (página inicial, `app/paginas/capa.py`):** Visão geral (números, mapa por estado combinado colorível por
   macrotema ou produto, cards de 12 macrotemas e 12 produtos com minigráfico) e Visão por programação (cards dos 7
@@ -47,16 +47,16 @@
 - **Ajustes da capa (18/10, commit af09a55):** filtros Macrotema → Produto (produtos com ≥ 0,5% dos docs do
   macrotema, ordem alfabética sem acento); cards dos grandes temas abrem `temas?macro=M##`. Tema T127 renomeado
   "Mamão e mamona" (BERTopic juntou os dois: 368 de 810 docs são de mamona; produtos marcam certo).
-- **Pendente da usuária:** trocar `tag` para `dados-2026-10` nos secrets e Reboot (capa e
+- **Pendente:** trocar `tag` para `dados-2026-10` nos secrets e Reboot (capa e
   mapa combinado só aparecem online depois disso); token vence 28/10.
 
 ## Rodada de outubro e camadas novas (17/10/2026)
 
-- **Exportação 2026-10 processada** (base de pessoas de setembro reaproveitada, com autorização da usuária).
+- **Exportação 2026-10 processada** (base de pessoas de setembro reaproveitada).
   Volumes (banco do app): 180.951 obras (+3.540; +2,0% sobre 2026-09) · 1.266 soluções (+17) · 3.192 projetos (+1).
   Testes: 11/11. Publicado: release privada `dados-2026-10` e release pública `enriquecimento-2026-10`.
 - **Produtos agropecuários** (`doc_produto`): 119.967 documentos com produto principal; 143.678 pares principais e
-  28.577 citados. Taxonomia de 104 produtos, base IBGE. Validação aguardando a usuária
+  28.577 citados. Taxonomia de 104 produtos, base IBGE. Validação pendente
   (`relatorios/produtos_validacao_2026-09.xlsx`).
 - **Estados** (`doc_estado.fonte`): 51.790 documentos com estado (40.632 citados + 11.741 via município, com
   sobreposição); em 2026-09 eram 40.032 só com citação.
@@ -65,7 +65,7 @@
 - **Correção:** `vetores.py` desalinhava a matriz quando dois documentos tinham texto idêntico (hash repetido no
   cache); agora uma linha por hash.
 - **Pendente:**
-  1. usuária trocar `tag = "dados-2026-10"` nos Secrets do app do Observatório e dar Reboot; **token vence 28/10**;
+  1. trocar `tag = "dados-2026-10"` nos Secrets do app do Observatório e dar Reboot; **token vence 28/10**;
   2. rodada de outubro do Florestas Plantadas (pipeline FP, site, app e release das Florestas);
   3. validação da amostra de produtos; termos em inglês para publicações em inglês;
   4. página de produtos/mapa no app Streamlit do Observatório (dados já no banco: `doc_produto`).
@@ -112,7 +112,7 @@
   `tar_make()`, conferir `relatorios/qualidade_2026-10.md`, publicar `dados-2026-10` e dar Reboot.
   Depois, rodar de novo o pipeline das Florestas e remontar o banco do Observatório das Florestas.
 
-**Decisões da usuária ainda abertas (registradas em 30/09; confirmar se continuam valendo):**
+**Decisões ainda abertas (registradas em 30/09; confirmar se continuam valendo):**
 - Programação com os 1.057 projetos atuais da planilha interna ("Projetos embrapa.xlsx"), considerada interna.
   A proposta é um segundo app Streamlit **privado** só com essa página, com convite por e-mail e o banco interno
   como asset separado na release privada. As alternativas são login OIDC ou senha compartilhada.

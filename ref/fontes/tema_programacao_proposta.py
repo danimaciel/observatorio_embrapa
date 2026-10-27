@@ -239,7 +239,7 @@ def main() -> None:
             tema_id=tid, tema=t2.rotulo[tid], macrotema=macro[t2.pai_id[tid]], n_documentos=int(n.get(tid, 0)),
             portfolio_1=p1, portfolio_2=p2, especificacao_1=e1, especificacao_2=e2, criterio=crit,
             certeza=certeza, nota=nota,
-            status="corrigir: a confirmar" if tid in PENDENTES else "referendada (18/10/2026)"))
+            status="corrigir: a confirmar" if tid in PENDENTES else "validada (18/10/2026)"))
     x = pd.DataFrame(rows).sort_values(["macrotema", "n_documentos"], ascending=[True, False])
     x.to_csv(RAIZ / "ref" / "tema_programacao.csv", index=False, encoding="utf-8")
 
