@@ -9,7 +9,7 @@
 - **`pipeline/py/enriquecimento.py`** passa a gravar também `temas.csv`, `pessoas.csv.gz`,
   `pessoa_produto.csv.gz`, `pessoa_tema.csv.gz` e `evidencias.csv.gz`; `enriquecimento.csv.gz` ganha `tema` e
   `macrotema` (por isso passa a ter quase todos os documentos, não só os com produto ou local).
-- **Critério (proposta a referendar):** só vínculos A/B/M e pessoas com unidade; peso projeto liderado 3, solução
+- **Critério (referendado pela usuária em 27/10):** só vínculos A/B/M e pessoas com unidade; peso projeto liderado 3, solução
   2 (via `pessoa_tecnologia`), publicação/participação 1, metade para documentos com mais de 10 anos; entra quem
   tem ≥ 3 documentos no produto/tema, 1 deles recente; até 5 evidências. Id público = hash do `pessoa_id`
   (`PS` + 10 hex); sem matrícula, contato ou id interno.
