@@ -8,7 +8,7 @@ interna de pessoas além do nome de exibição e da unidade (sem matrícula, con
   data/processed/registro_obra.csv.gz   registro de publicação (B:id, um por unidade depositante) → obra (OB:id)
   data/processed/produtos.csv           cópia da taxonomia (produto_id → nome, categoria, grupo, fonte IBGE)
   data/processed/temas.csv              tema_id (T###) e macrotema (M##) → rótulo (BERTopic, rótulos curados)
-  data/processed/pessoas.csv.gz         pessoa (id público), nome, unidade_id, n_docs, ano_ultimo
+  data/processed/pessoas.csv.gz         pessoa (id público), nome, unidade_id, unidade (nome), n_docs, ano_ultimo
   data/processed/pessoa_produto.csv.gz  pessoa × produto (só força principal): indicadores e evidências
   data/processed/pessoa_tema.csv.gz     pessoa × tema (T###): mesmos indicadores
   data/processed/evidencias.csv.gz      doc_uid, tipo_doc, titulo, ano, url dos documentos citados como evidência
@@ -121,10 +121,12 @@ def main() -> None:
     p = pes[pes.pessoa_id.isin(listadas)].copy()
     p["n_docs"] = p.pessoa_id.map(total)
     p["ano_ultimo"] = p.pessoa_id.map(v.groupby("pessoa_id").ano.max())
+    uni = pd.read_csv(RAIZ / "ref" / "unidade.csv", dtype=str).set_index("unidade_id").nome_atual
+    p["unidade"] = p.unidade_ref_id.map(uni)
     ids = {k: id_publico(k) for k in p.pessoa_id}
     (p.assign(pessoa=p.pessoa_id.map(ids))
       .rename(columns={"nome_exibicao": "nome", "unidade_ref_id": "unidade_id"})
-      [["pessoa", "nome", "unidade_id", "n_docs", "ano_ultimo"]]
+      [["pessoa", "nome", "unidade_id", "unidade", "n_docs", "ano_ultimo"]]
       .to_csv(PROC / "pessoas.csv.gz", index=False, encoding="utf-8"))
     for t, arq in ((pp, "pessoa_produto.csv.gz"), (ptm, "pessoa_tema.csv.gz")):
         t.assign(pessoa=t.pessoa_id.map(ids)).drop(columns="pessoa_id") \
