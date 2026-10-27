@@ -155,7 +155,9 @@ list(
     saidas = c("data/processed/enriquecimento.csv.gz", "data/processed/registro_obra.csv.gz",
                "data/processed/produtos.csv", "data/processed/temas.csv", "data/processed/pessoas.csv.gz",
                "data/processed/pessoa_produto.csv.gz", "data/processed/pessoa_tema.csv.gz",
-               "data/processed/evidencias.csv.gz"),
+               "data/processed/evidencias.csv.gz", "data/processed/rede_produto_tema.csv.gz",
+               "data/processed/rede_vizinhos.csv.gz",
+               "data/processed/documentos_rede.csv.gz"),
     dep = list(parquets, parquets_semantica, semantica_produtos, semantica_municipios, parquets_biomas,
                semantica_temas)), format = "file"),
 

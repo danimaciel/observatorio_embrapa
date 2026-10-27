@@ -12,6 +12,16 @@ interna de pessoas além do nome de exibição e da unidade (sem matrícula, con
   data/processed/pessoa_produto.csv.gz  pessoa × produto (só força principal): indicadores e evidências
   data/processed/pessoa_tema.csv.gz     pessoa × tema (T###): mesmos indicadores
   data/processed/evidencias.csv.gz      doc_uid, tipo_doc, titulo, ano, url dos documentos citados como evidência
+  data/processed/rede_produto_tema.csv.gz  produto × tema: n_docs, n_recentes, palavras-chave típicas e documentos
+                                        de exemplo (rede por produto da Rede iAgro)
+  data/processed/rede_vizinhos.csv.gz   produto × produto vizinho (documentos em comum, força principal)
+  data/processed/documentos_rede.csv.gz doc_uid, tipo_doc, titulo, ano, url, unidade_id dos documentos de exemplo
+Rede por produto (outubro de 2026):
+  - Pares produto (força principal) × tema com ao menos 3 documentos; até 12 temas por produto.
+  - Palavras-chave típicas do par: peso = n no par × log(N / n no acervo), ao menos 2 ocorrências no par,
+    sem os termos de busca do próprio produto; até 8 por par.
+  - Documentos de exemplo: os mais recentes do par, até 12 publicações, 4 projetos e 4 soluções.
+  - Vizinhos: os 8 produtos com mais documentos em comum (ao menos 3), para navegar de um produto a outro.
 Publicado a cada mês como release pública "enriquecimento-AAAA-MM" em danimaciel/observatorio_embrapa
 (ver skill atualizacao-mensal). Consumido por danimaciel/iagro-embrapa, iagro (Rede iAgro) e iagro-conversa.
 
@@ -28,6 +38,7 @@ import shutil
 import sys
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -38,6 +49,8 @@ PROC = RAIZ / "data" / "processed"
 PESO_PAPEL = {"lider": 3, "tecnologia": 2, "autor": 1, "membro": 1}
 JANELA_ANOS = 10
 MIN_DOCS, MIN_RECENTES, N_EVIDENCIAS = 3, 1, 5
+TEMAS_POR_PRODUTO, PALAVRAS_POR_PAR = 12, 8
+EXEMPLOS = {"publicacao": 12, "projeto": 4, "tecnologia": 4}
 
 
 def juntar(s: pd.Series) -> str:
@@ -82,8 +95,46 @@ def por_eixo(v: pd.DataFrame, eixo: pd.DataFrame, col: str, total: pd.Series) ->
     return r.sort_values([col, "peso"], ascending=[True, False])
 
 
+def rede_produto_tema(doc: pd.DataFrame, dp: pd.DataFrame, dt: pd.DataFrame) -> tuple[pd.DataFrame, set]:
+    """Produto × tema com contagens, palavras-chave típicas e documentos de exemplo."""
+    pt = (dp.loc[dp.forca == "principal", ["doc_uid", "produto_id"]].drop_duplicates()
+          .merge(dt[["doc_uid", "tema_id"]], on="doc_uid")
+          .merge(doc[["doc_uid", "tipo_doc", "ano"]], on="doc_uid"))
+    ano_ref = int(doc.ano.max())
+    pt["recente"] = pt.ano >= ano_ref - JANELA_ANOS + 1
+    par = pt.groupby(["produto_id", "tema_id"]).agg(n_docs=("doc_uid", "nunique"), n_recentes=("recente", "sum"))
+    par = par[par.n_docs >= MIN_DOCS].reset_index().sort_values(["produto_id", "n_docs"], ascending=[True, False])
+    par = par.groupby("produto_id").head(TEMAS_POR_PRODUTO)
+
+    kw = pd.read_parquet(PROC / "documento_keyword.parquet", columns=["doc_uid", "keyword_norm", "keyword_raw"])
+    kw = kw.drop_duplicates(["doc_uid", "keyword_norm"])
+    idf = np.log(doc.doc_uid.nunique() / kw.groupby("keyword_norm").doc_uid.nunique())
+    rotulo = kw.groupby("keyword_norm").keyword_raw.agg(lambda s: s.str.lower().mode().iat[0])
+    tax = pd.read_csv(RAIZ / "ref" / "produtos.csv", dtype=str).fillna("").set_index("produto_id")
+    proprios = {p: {t.strip("*").strip() for t in (tax.at[p, "termos"] + "|" + tax.at[p, "produto"].lower()).split("|")}
+                if p in tax.index else set() for p in par.produto_id.unique()}
+    pk = pt.merge(par[["produto_id", "tema_id"]]).merge(kw[["doc_uid", "keyword_norm"]], on="doc_uid")
+    cont = pk.groupby(["produto_id", "tema_id", "keyword_norm"]).doc_uid.nunique().rename("n").reset_index()
+    alheio = np.array([k not in proprios[p] for p, k in zip(cont.produto_id, cont.keyword_norm)], dtype=bool)
+    cont = cont[(cont.n >= 2).to_numpy() & alheio]
+    cont["peso"] = cont.n * cont.keyword_norm.map(idf)
+    cont = cont.sort_values("peso", ascending=False).groupby(["produto_id", "tema_id"]).head(PALAVRAS_POR_PAR)
+    palavras = cont.groupby(["produto_id", "tema_id"]).apply(
+        lambda g: ";".join(f"{rotulo[k]}:{n}" for k, n in zip(g.keyword_norm, g.n)), include_groups=False)
+
+    ex = pt.merge(par[["produto_id", "tema_id"]]).sort_values("ano", ascending=False)
+    ex = ex[ex.groupby(["produto_id", "tema_id", "tipo_doc"]).cumcount() < ex.tipo_doc.map(EXEMPLOS).fillna(0)]
+    docs = ex.groupby(["produto_id", "tema_id"]).doc_uid.agg(";".join)
+
+    chave = list(zip(par.produto_id, par.tema_id))
+    par["palavras"] = [palavras.get(c, "") for c in chave]
+    par["docs"] = [docs.get(c, "") for c in chave]
+    return par, set(ex.doc_uid)
+
+
 def main() -> None:
-    doc = pd.read_parquet(PROC / "documento.parquet", columns=["doc_uid", "tipo_doc", "titulo", "ano", "url"])
+    doc = pd.read_parquet(PROC / "documento.parquet",
+                          columns=["doc_uid", "tipo_doc", "titulo", "ano", "url", "unidade_id"])
     dp = pd.read_parquet(PROC / "doc_produto.parquet")
     dm = pd.read_parquet(PROC / "doc_municipio.parquet")
     dm = dm[dm.confianca.isin(["alta", "media"])]
@@ -133,11 +184,25 @@ def main() -> None:
          .pipe(lambda d: d[["pessoa"] + [c for c in d.columns if c != "pessoa"]]) \
          .to_csv(PROC / arq, index=False, encoding="utf-8")
     usados = set(";".join(pd.concat([pp.evidencias, ptm.evidencias])).split(";")) - {""}
-    doc[doc.doc_uid.isin(usados)].to_csv(PROC / "evidencias.csv.gz", index=False, encoding="utf-8")
+    doc.loc[doc.doc_uid.isin(usados), ["doc_uid", "tipo_doc", "titulo", "ano", "url"]] \
+       .to_csv(PROC / "evidencias.csv.gz", index=False, encoding="utf-8")
+
+    # Rede por produto
+    rede, exemplos = rede_produto_tema(doc, dp, dt)
+    rede.to_csv(PROC / "rede_produto_tema.csv.gz", index=False, encoding="utf-8")
+    pr = dp.loc[dp.forca == "principal", ["doc_uid", "produto_id"]].drop_duplicates()
+    viz = pr.merge(pr, on="doc_uid", suffixes=("", "_viz"))
+    viz = viz[viz.produto_id != viz.produto_id_viz].groupby(["produto_id", "produto_id_viz"]).size().rename("n")
+    viz = viz[viz >= MIN_DOCS].reset_index().sort_values(["produto_id", "n"], ascending=[True, False])
+    viz.groupby("produto_id").head(8).rename(columns={"produto_id_viz": "vizinho"}) \
+       .to_csv(PROC / "rede_vizinhos.csv.gz", index=False, encoding="utf-8")
+    doc[doc.doc_uid.isin(exemplos)].to_csv(PROC / "documentos_rede.csv.gz", index=False, encoding="utf-8")
 
     print(f"enriquecimento: {len(e):,} documentos com produto, local ou tema; registro_obra: {len(pub):,} registros")
     print(f"pessoas: {len(p):,} listadas; pessoa×produto: {len(pp):,}; pessoa×tema: {len(ptm):,}; "
           f"evidências: {len(usados):,} documentos")
+    print(f"rede: {len(rede):,} pares produto×tema em {rede.produto_id.nunique()} produtos; "
+          f"{len(exemplos):,} documentos de exemplo")
 
 
 if __name__ == "__main__":
