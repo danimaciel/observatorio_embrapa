@@ -15,7 +15,7 @@ interna de pessoas além do nome de exibição e da unidade (sem matrícula, con
 Publicado a cada mês como release pública "enriquecimento-AAAA-MM" em danimaciel/observatorio_embrapa
 (ver skill atualizacao-mensal). Consumido por danimaciel/iagro-embrapa, iagro (Rede iAgro) e iagro-conversa.
 
-"Quem trabalha com isso" (critérios referendados pela usuária em 27/10/2026):
+"Quem trabalha com isso" (critérios de outubro de 2026):
   - Só vínculos de confiança A, B ou M (documento_pessoa) e pessoas com unidade da Embrapa.
   - Peso por documento: projeto liderado 3, solução tecnológica 2 (autor de obra citada pela solução,
     pessoa_tecnologia), publicação ou participação em projeto 1; documentos com mais de 10 anos valem metade.

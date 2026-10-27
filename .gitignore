@@ -34,3 +34,5 @@ relatorios/piloto_municipios_amostra.csv
 relatorios/programacao_amostra.csv
 # Programação interna (metas, status): fica fora do repositório público até confirmação
 ref/programacao_desafios.csv
+# Diário de trabalho: só local
+/estado.md

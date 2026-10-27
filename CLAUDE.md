@@ -4,7 +4,7 @@ Infraestrutura analítica que integra projetos, publicações, tecnologias, pesq
 (exportações públicas do Redape + base interna de pessoas). Desenho: `docs/01-desenho-do-sistema.md`;
 roteiro de atualização mensal: `README.md`.
 
-**Comece lendo `estado.md`** (dados em produção, entregas e pendências) e atualize-o ao fim de cada sessão.
+**Comece lendo `estado.md`** (local, fora do git) (dados em produção, entregas e pendências) e atualize-o ao fim de cada sessão.
 
 ## Ambiente (Windows)
 
@@ -14,13 +14,15 @@ roteiro de atualização mensal: `README.md`.
 - **App Streamlit**: `app/app.py` (launch "observatorio", porta 8501). Banco `data/processed/observatorio_app.duckdb`.
 - Pipeline completo ~14 min; embeddings em CPU ~3 docs/s (incremental por hash do texto; carga grande → Colab).
 
-## Regras da usuária
+## Regras do projeto
 
 - **R preferido**; Python só onde R não serve (embeddings/BERTopic/app).
 - **Números**: sempre com a etapa a que pertencem e vindos de um artefato do pipeline, nunca de memória.
   Se um número mudar, dizer explicitamente quanto e por quê.
-- **Referências**: toda categoria, taxonomia ou método com fonte e status (oficial / proposta / conhecimento
-  do Claude a referendar).
+- **Referências**: toda categoria, taxonomia ou método com fonte e status (oficial / proposta metodológica, em validação / validada em
+  AAAA-MM-DD).
+- **Textos públicos** (código, comentários, notas de tabelas, docs): o repositório é público; escrever
+  em tom de método, com datas e critérios, sem citar quem pediu, decidiu ou aprovou.
 - **Privacidade (LGPD)**: dados brutos e a base de pessoas nunca vão para o git (`data/`, `*.duckdb`, `*.xls*`).
   Matrícula é descartada na leitura. **Resultados analíticos são públicos**; restringir só o dado bruto —
   perguntar "o arquivo bruto ou também os resultados?" antes de esconder algo.
@@ -37,7 +39,7 @@ roteiro de atualização mensal: `README.md`.
   Marcação em `pipeline/py/produtos.py` (target `semantica_produtos`): apaga nomes de unidades da Embrapa antes de
   procurar, exige palavra inteira fora de composto com hífen, usa contexto e exclusões. Força **principal** (título
   ou palavras-chave) × **citado** (só resumo): etiquetas, filtros e contagens usam só **principal**.
-  Termos, sinônimos e agrupamentos amplos são proposta a referendar; validação em `relatorios/produtos_validacao_*.xlsx`.
+  Termos, sinônimos e agrupamentos amplos são proposta metodológica, em validação; validação em `relatorios/produtos_validacao_*.xlsx`.
 - **Estados** (`doc_estado.fonte`): `citado` no texto ou `municipio` (estado do município de confiança alta/média;
   homônimo só entra quando o texto confirma o estado — decisão da usuária).
 - Nota metodológica: `documentacao/Produtos_e_localizacao_2026-10-17.{md,docx}` (entra na documentação principal

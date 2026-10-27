@@ -5,8 +5,8 @@ Base oficial: categorias de produto do IBGE (SIDRA), guardadas em ref/ibge_produ
   origem animal · PPM 3940 (c654) aquicultura · PEVS 289 (c193) extração vegetal · PEVS 291 (c194) silvicultura.
 Grupo de atividade: CNAE 2.0 / Censo Agropecuário 2017 (oficial). Categoria ampla "Grãos" = cereais, leguminosas
 e oleaginosas do LSPA/IBGE (oficial); "Pastagens e forrageiras" = Censo Agropecuário (oficial, uso da terra);
-"Frutas", "Hortaliças", "Fibras", "Estimulantes" etc. = agrupamentos da lista PAM (proposta a referendar).
-Termos de busca, nomes científicos e regras de contexto: proposta do Claude a referendar.
+"Frutas", "Hortaliças", "Fibras", "Estimulantes" etc. = agrupamentos da lista PAM (proposta metodológica, em validação).
+Termos de busca, nomes científicos e regras de contexto: proposta metodológica, em validação.
 
 Rodar quando a taxonomia mudar:  python pipeline/py/produtos_taxonomia.py
 Colunas de ref/produtos.csv:
@@ -162,8 +162,8 @@ def main():
         w.writerow(["produto_id", "produto", "grupo_atividade", "categoria_ampla", "fonte_ibge", "termos",
                     "cientifico", "contexto", "excluir", "status"])
         for pid, nome, grupo, cat, fontes, termos, cient, ctx in P:
-            status = "categoria IBGE oficial; termos e agrupamento: proposta Claude a referendar" if fontes \
-                else "categoria ampla: proposta Claude a referendar"
+            status = "categoria IBGE oficial; termos e agrupamento: proposta metodológica, em validação" if fontes \
+                else "categoria ampla: proposta metodológica, em validação"
             w.writerow([pid, nome, grupo, cat, " | ".join(fontes), termos, cient, ctx, EXCLUIR.get(pid, ""), status])
     print(f"{len(P)} produtos em {saida}")
 

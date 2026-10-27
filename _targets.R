@@ -172,7 +172,7 @@ list(
   ), "data/processed"), format = "file"),
 
   # Programação oficial: objetivos/especificações (Plano Diretor), portfólios (Portal) e tema → programação
-  # (tabela referendada pela usuária em 18/10/2026). Os documentos herdam pelo tema (doc_tema).
+  # (tabela validada em 18/10/2026). Os documentos herdam pelo tema (doc_tema).
   tar_target(arq_ref_tema_programacao, "ref/tema_programacao.csv", format = "file"),
   tar_target(arq_ref_portfolios, "ref/portfolios.csv", format = "file"),
   tar_target(arq_ref_objetivos, "ref/objetivos_estrategicos.csv", format = "file"),
