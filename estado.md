@@ -1,6 +1,20 @@
 # Estado do projeto · Observatório de Pesquisa da Embrapa
 
-*Atualizado em 2026-10-18. Atualizar este arquivo ao fim de cada sessão de trabalho.*
+*Atualizado em 2026-10-27. Atualizar este arquivo ao fim de cada sessão de trabalho.*
+
+## Pessoas e temas no arquivo público (27/10/2026, PR aberto, falta rodar)
+
+- **Pedido da usuária (Rede iAgro):** mostrar "quem trabalha com isso" ao lado do kit de leitura, com nomes
+  tirados das publicações e projetos (dado pessoal já público; aprovado por ela em 27/10).
+- **`pipeline/py/enriquecimento.py`** passa a gravar também `temas.csv`, `pessoas.csv.gz`,
+  `pessoa_produto.csv.gz`, `pessoa_tema.csv.gz` e `evidencias.csv.gz`; `enriquecimento.csv.gz` ganha `tema` e
+  `macrotema` (por isso passa a ter quase todos os documentos, não só os com produto ou local).
+- **Critério (referendado pela usuária em 27/10):** só vínculos A/B/M e pessoas com unidade; peso projeto liderado 3, solução
+  2 (via `pessoa_tecnologia`), publicação/participação 1, metade para documentos com mais de 10 anos; entra quem
+  tem ≥ 3 documentos no produto/tema, 1 deles recente; até 5 evidências. Id público = hash do `pessoa_id`
+  (`PS` + 10 hex); sem matrícula, contato ou id interno.
+- Testado só com dados sintéticos (sessão na nuvem, sem `data/`). **Falta:** `tar_make()` no PC, conferir
+  números e publicar `enriquecimento-2026-10` de novo (ou `-2026-11`) com os arquivos novos.
 
 ## Frente estratégica: capa e programação (18/10/2026, em andamento)
 
