@@ -4,7 +4,7 @@ Infraestrutura analítica que integra projetos, publicações, tecnologias, pesq
 (exportações públicas do Redape + base interna de pessoas). Desenho: `docs/01-desenho-do-sistema.md`;
 roteiro de atualização mensal: `README.md`.
 
-**Comece lendo `estado.md`** (dados em produção, entregas e pendências) e atualize-o ao fim de cada sessão.
+**Comece lendo `estado.md`** (local, fora do git) (dados em produção, entregas e pendências) e atualize-o ao fim de cada sessão.
 
 ## Ambiente (Windows)
 
@@ -21,7 +21,7 @@ roteiro de atualização mensal: `README.md`.
   Se um número mudar, dizer explicitamente quanto e por quê.
 - **Referências**: toda categoria, taxonomia ou método com fonte e status (oficial / proposta metodológica, em validação / validada em
   AAAA-MM-DD).
-- **Textos públicos** (código, comentários, notas de tabelas, docs, `estado.md`): o repositório é público; escrever
+- **Textos públicos** (código, comentários, notas de tabelas, docs): o repositório é público; escrever
   em tom de método, com datas e critérios, sem citar quem pediu, decidiu ou aprovou.
 - **Privacidade (LGPD)**: dados brutos e a base de pessoas nunca vão para o git (`data/`, `*.duckdb`, `*.xls*`).
   Matrícula é descartada na leitura. **Resultados analíticos são públicos**; restringir só o dado bruto —
