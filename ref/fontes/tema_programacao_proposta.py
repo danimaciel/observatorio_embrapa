@@ -1,8 +1,7 @@
 """Rascunho da tabela tema (BERTopic) → portfólio(s) e especificação(ões) do Plano Diretor 2024–2030.
 
-Status: proposta do Claude (18/10/2026) REFERENDADA pela usuária em 18/10/2026 (revisão em
-relatorios/tema_programacao_revisao.xlsx: 144 ok, 2 corrigir); T031 Seringueira corrigida pela usuária
-(Economia da Biodiversidade, O05.1). Fontes dos critérios: caracterização oficial
+Status: validada em 18/10/2026 (revisão de 146 temas: 144 sem mudança, 2 corrigidos); T031 Seringueira
+corrigida para Economia da Biodiversidade, O05.1. Fontes dos critérios: caracterização oficial
 dos portfólios (ref/portfolios.csv, Portal Embrapa) e especificações oficiais (ref/objetivos_estrategicos.csv,
 Plano Diretor). A ligação documento → programação é herdada do tema do documento (doc_tema).
 
@@ -41,7 +40,7 @@ P = {
     "T017": ("prosur", "", "O01.1", "", "producao", "alta", ""),
     "T022": ("ecoclima", "biodiversidade", "O02.5", "O05.1", "recursos_nat", "duvida",
              "polinizadores (serviço ecossistêmico) × mel e meliponicultura (produto da biodiversidade)"),
-    "T031": ("biodiversidade", "prosur", "O05.1", "O01.1", "sociobio", "alta", "revisão da usuária (18/10/2026): Economia da Biodiversidade, O05.1"),
+    "T031": ("biodiversidade", "prosur", "O05.1", "O01.1", "sociobio", "alta", "revisão de 18/10/2026: Economia da Biodiversidade, O05.1"),
     "T055": ("prosur", "consumidor", "O01.1", "O03.3", "producao", "alta", ""),
     "T064": ("prosur", "everde", "O01.1", "O05.5", "producao", "media", "dendê: óleo e biocombustível"),
     "T117": ("prosur", "", "O01.1", "", "producao", "alta", ""),
@@ -212,7 +211,7 @@ P = {
 }
 
 
-PENDENTES: set[str] = set()     # T031 Seringueira resolvida pela usuária em 18/10/2026
+PENDENTES: set[str] = set()     # T031 Seringueira resolvida em 18/10/2026
 
 
 def main() -> None:
@@ -244,14 +243,14 @@ def main() -> None:
     x = pd.DataFrame(rows).sort_values(["macrotema", "n_documentos"], ascending=[True, False])
     x.to_csv(RAIZ / "ref" / "tema_programacao.csv", index=False, encoding="utf-8")
 
-    # Planilha de revisão: nomes por extenso, exemplos de títulos e colunas para a decisão da usuária
+    # Planilha de revisão: nomes por extenso, exemplos de títulos e colunas para a decisão
     nomep = lambda p: port.nome_portal.get(p, "") if p else "— (transversal)"
     nomee = lambda e: f"{e} {esp.especificacao[e]} ({esp.objetivo[e]})" if e else ""
     r = x.assign(portfolio_1=x.portfolio_1.map(nomep), portfolio_2=x.portfolio_2.map(lambda p: nomep(p) if p else ""),
                  especificacao_1=x.especificacao_1.map(nomee), especificacao_2=x.especificacao_2.map(nomee),
                  exemplos=x.tema_id.map(ex), decisao="", correcao="", comentario="")
     saida = RAIZ / "relatorios" / "tema_programacao_revisao.xlsx"
-    if saida.exists():          # não sobrescreve a planilha já revisada pela usuária
+    if saida.exists():          # não sobrescreve a planilha já revisada
         saida = saida.with_name("tema_programacao_revisao_v2.xlsx")
     with pd.ExcelWriter(saida, engine="openpyxl") as w:
         r.drop(columns=["status"]).to_excel(w, sheet_name="Temas", index=False)

@@ -1,5 +1,5 @@
 # Localização combinada de cada documento --------------------------------------------
-# Um local por documento, na ordem de preferência (decisão da usuária em 18/10/2026):
+# Um local por documento, na ordem de preferência (critério de 18/10/2026):
 #   1. municipio_citado — municípios citados no texto (confiança alta ou média);
 #   2. estado_citado    — estado citado no texto, sem município identificado;
 #   3. sede_unidade     — aproximação: município da sede da unidade principal do documento

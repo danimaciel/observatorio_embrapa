@@ -171,7 +171,7 @@ def main() -> None:
     dm.drop(columns="trecho").to_parquet(PROC / "doc_municipio.parquet", index=False)
     # Estados: citados no texto + estado dos municípios citados (confiança alta ou média). Homônimos só têm
     # confiança média quando o próprio texto cita o estado, então nenhum estado é inferido de um homônimo
-    # sem essa confirmação (decisão da usuária, 17/10/2026). fonte = "citado" ou "municipio".
+    # sem essa confirmação (critério de 17/10/2026). fonte = "citado" ou "municipio".
     de = pd.DataFrame(estados, columns=["doc_uid", "uf"]).drop_duplicates().assign(fonte="citado")
     via_mun = dm[dm.confianca.isin(["alta", "media"])][["doc_uid", "uf"]].drop_duplicates().assign(fonte="municipio")
     de = pd.concat([de, via_mun]).drop_duplicates(["doc_uid", "uf"], keep="first")
