@@ -16,10 +16,16 @@ interna de pessoas além do nome de exibição e da unidade (sem matrícula, con
                                         de exemplo (rede por produto da Rede iAgro)
   data/processed/rede_vizinhos.csv.gz   produto × produto vizinho (documentos em comum, força principal)
   data/processed/documentos_rede.csv.gz doc_uid, tipo_doc, titulo, ano, url, unidade_id dos documentos de exemplo
+  data/processed/unidade_produto.csv.gz unidade_id, unidade (nome) × produto (só força principal): documentos por
+                                        tipo e pessoas listadas da unidade
+  data/processed/unidade_tema.csv.gz    unidade × tema (T###): mesmos indicadores
+  data/processed/unidade_produto_tema.csv.gz  par produto × tema da rede × unidade: até 5 unidades por par
 Rede por produto (outubro de 2026):
   - Pares produto (força principal) × tema com ao menos 3 documentos; até 12 temas por produto.
   - Palavras-chave típicas do par: peso = n no par × log(N / n no acervo), ao menos 2 ocorrências no par,
-    sem os termos de busca do próprio produto; até 8 por par.
+    sem as do próprio produto (nome, termos de busca e nome científico, comparados sem acento e com hífen
+    como espaço; termo
+    terminado em * vale como prefixo); até 8 por par.
   - Documentos de exemplo: os mais recentes do par, até 12 publicações, 4 projetos e 4 soluções.
   - Vizinhos: os 8 produtos com mais documentos em comum (ao menos 3), para navegar de um produto a outro.
 Publicado a cada mês como release pública "enriquecimento-AAAA-MM" em danimaciel/observatorio_embrapa
@@ -32,10 +38,15 @@ Publicado a cada mês como release pública "enriquecimento-AAAA-MM" em danimaci
   - foco = documentos da pessoa no produto/tema ÷ todos os documentos da pessoa.
   - Entra só quem tem ao menos 3 documentos no produto/tema, sendo 1 dos últimos 10 anos.
   - Evidências: até 5 documentos (mais recentes e de maior peso) para mostrar ao lado do nome.
+  - Unidades (outubro de 2026): porta de entrada antes das pessoas. Documentos contados pela unidade do
+    documento (unidade representante da obra); entra o par com ao menos 3 documentos; n_pessoas = pessoas
+    listadas em pessoa×produto/tema cuja unidade é a da linha. Por par produto × tema da rede, as 5 unidades
+    com mais documentos.
 """
 import hashlib
 import shutil
 import sys
+import unicodedata
 from pathlib import Path
 
 import numpy as np
@@ -51,6 +62,17 @@ JANELA_ANOS = 10
 MIN_DOCS, MIN_RECENTES, N_EVIDENCIAS = 3, 1, 5
 TEMAS_POR_PRODUTO, PALAVRAS_POR_PAR = 12, 8
 EXEMPLOS = {"publicacao": 12, "projeto": 4, "tecnologia": 4}
+UNIDADES_POR_PAR = 5
+
+
+def sem_acento(s: str) -> str:
+    return unicodedata.normalize("NFD", s).encode("ascii", "ignore").decode().lower().replace("-", " ").strip()
+
+
+def termos_proprios(t: pd.Series) -> tuple[set, tuple]:
+    """Nome, termos de busca e nome científico do produto: (exatos, prefixos dos termos terminados em *)."""
+    ts = [sem_acento(x) for x in [t["produto"], *t["termos"].split("|"), *t["cientifico"].split(";")] if x.strip()]
+    return {x for x in ts if not x.endswith("*")}, tuple(x.rstrip("*") for x in ts if x.endswith("*"))
 
 
 def juntar(s: pd.Series) -> str:
@@ -95,6 +117,25 @@ def por_eixo(v: pd.DataFrame, eixo: pd.DataFrame, col: str, total: pd.Series) ->
     return r.sort_values([col, "peso"], ascending=[True, False])
 
 
+def por_unidade(doc: pd.DataFrame, eixo: pd.DataFrame, cols: list, uni: pd.Series,
+                listadas: pd.DataFrame | None = None) -> pd.DataFrame:
+    """Indicadores de unidade × (produto, tema ou par), com quantas pessoas listadas de cada unidade."""
+    x = eixo.merge(doc[["doc_uid", "tipo_doc", "ano", "unidade_id"]], on="doc_uid").dropna(subset=["unidade_id"])
+    x["recente"] = x.ano >= int(doc.ano.max()) - JANELA_ANOS + 1
+    for t in ("publicacao", "projeto", "tecnologia"):
+        x[t] = x.tipo_doc == t
+    chave = cols + ["unidade_id"]
+    r = x.groupby(chave).agg(n_docs=("doc_uid", "nunique"), n_recentes=("recente", "sum"),
+                             n_publicacoes=("publicacao", "sum"), n_projetos=("projeto", "sum"),
+                             n_tecnologias=("tecnologia", "sum"))
+    r = r[r.n_docs >= MIN_DOCS].reset_index()
+    if listadas is not None:
+        r["n_pessoas"] = r.set_index(chave).index.map(
+            listadas.groupby(chave).pessoa_id.nunique()).fillna(0).astype(int)
+    r.insert(len(chave), "unidade", r.unidade_id.map(uni))
+    return r.sort_values(cols + ["n_docs"], ascending=[True] * len(cols) + [False])
+
+
 def rede_produto_tema(doc: pd.DataFrame, dp: pd.DataFrame, dt: pd.DataFrame) -> tuple[pd.DataFrame, set]:
     """Produto × tema com contagens, palavras-chave típicas e documentos de exemplo."""
     pt = (dp.loc[dp.forca == "principal", ["doc_uid", "produto_id"]].drop_duplicates()
@@ -111,11 +152,12 @@ def rede_produto_tema(doc: pd.DataFrame, dp: pd.DataFrame, dt: pd.DataFrame) -> 
     idf = np.log(doc.doc_uid.nunique() / kw.groupby("keyword_norm").doc_uid.nunique())
     rotulo = kw.groupby("keyword_norm").keyword_raw.agg(lambda s: s.str.lower().mode().iat[0])
     tax = pd.read_csv(RAIZ / "ref" / "produtos.csv", dtype=str).fillna("").set_index("produto_id")
-    proprios = {p: {t.strip("*").strip() for t in (tax.at[p, "termos"] + "|" + tax.at[p, "produto"].lower()).split("|")}
-                if p in tax.index else set() for p in par.produto_id.unique()}
+    proprios = {p: termos_proprios(tax.loc[p]) if p in tax.index else (set(), ())
+                for p in par.produto_id.unique()}
     pk = pt.merge(par[["produto_id", "tema_id"]]).merge(kw[["doc_uid", "keyword_norm"]], on="doc_uid")
     cont = pk.groupby(["produto_id", "tema_id", "keyword_norm"]).doc_uid.nunique().rename("n").reset_index()
-    alheio = np.array([k not in proprios[p] for p, k in zip(cont.produto_id, cont.keyword_norm)], dtype=bool)
+    alheio = np.array([not (sem_acento(k) in proprios[p][0] or sem_acento(k).startswith(proprios[p][1]))
+                       for p, k in zip(cont.produto_id, cont.keyword_norm)], dtype=bool)
     cont = cont[(cont.n >= 2).to_numpy() & alheio]
     cont["peso"] = cont.n * cont.keyword_norm.map(idf)
     cont = cont.sort_values("peso", ascending=False).groupby(["produto_id", "tema_id"]).head(PALAVRAS_POR_PAR)
@@ -187,11 +229,22 @@ def main() -> None:
     doc.loc[doc.doc_uid.isin(usados), ["doc_uid", "tipo_doc", "titulo", "ano", "url"]] \
        .to_csv(PROC / "evidencias.csv.gz", index=False, encoding="utf-8")
 
+    # Unidades que trabalham com cada produto e tema (aparecem antes das pessoas)
+    pes_uni = pes.set_index("pessoa_id").unidade_ref_id
+    prin = dp.loc[dp.forca == "principal", ["doc_uid", "produto_id"]].drop_duplicates()
+    up = por_unidade(doc, prin, ["produto_id"], uni, pp.assign(unidade_id=pp.pessoa_id.map(pes_uni)))
+    ut = por_unidade(doc, dt[["doc_uid", "tema_id"]], ["tema_id"], uni, ptm.assign(unidade_id=ptm.pessoa_id.map(pes_uni)))
+    up.to_csv(PROC / "unidade_produto.csv.gz", index=False, encoding="utf-8")
+    ut.to_csv(PROC / "unidade_tema.csv.gz", index=False, encoding="utf-8")
+
     # Rede por produto
     rede, exemplos = rede_produto_tema(doc, dp, dt)
     rede.to_csv(PROC / "rede_produto_tema.csv.gz", index=False, encoding="utf-8")
-    pr = dp.loc[dp.forca == "principal", ["doc_uid", "produto_id"]].drop_duplicates()
-    viz = pr.merge(pr, on="doc_uid", suffixes=("", "_viz"))
+    upt = por_unidade(doc, prin.merge(dt[["doc_uid", "tema_id"]], on="doc_uid")
+                              .merge(rede[["produto_id", "tema_id"]]), ["produto_id", "tema_id"], uni)
+    upt = upt.groupby(["produto_id", "tema_id"]).head(UNIDADES_POR_PAR)
+    upt.to_csv(PROC / "unidade_produto_tema.csv.gz", index=False, encoding="utf-8")
+    viz = prin.merge(prin, on="doc_uid", suffixes=("", "_viz"))
     viz = viz[viz.produto_id != viz.produto_id_viz].groupby(["produto_id", "produto_id_viz"]).size().rename("n")
     viz = viz[viz >= MIN_DOCS].reset_index().sort_values(["produto_id", "n"], ascending=[True, False])
     viz.groupby("produto_id").head(8).rename(columns={"produto_id_viz": "vizinho"}) \
@@ -201,6 +254,8 @@ def main() -> None:
     print(f"enriquecimento: {len(e):,} documentos com produto, local ou tema; registro_obra: {len(pub):,} registros")
     print(f"pessoas: {len(p):,} listadas; pessoa×produto: {len(pp):,}; pessoa×tema: {len(ptm):,}; "
           f"evidências: {len(usados):,} documentos")
+    print(f"unidades: unidade×produto: {len(up):,} em {up.produto_id.nunique()} produtos; "
+          f"unidade×tema: {len(ut):,}; unidade×par da rede: {len(upt):,}")
     print(f"rede: {len(rede):,} pares produto×tema em {rede.produto_id.nunique()} produtos; "
           f"{len(exemplos):,} documentos de exemplo")
 
