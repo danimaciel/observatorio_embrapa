@@ -1,15 +1,15 @@
 # Produtos agropecuários nos documentos (piloto)
 
-Exportação 2026-09. Taxonomia `ref/produtos.csv` (104 produtos). Texto: título + resumo + palavras-chave.
+Exportação 2026-10. Taxonomia `ref/produtos.csv` (104 produtos). Texto: título + resumo + palavras-chave.
 
-- Documentos com ao menos um produto: 127,365 de 185,409
-- Pares documento × produto: 172,255 (principal: 143,678; citado: 28,577)
-- Documentos com produto principal (título ou palavras-chave): 119,967
+- Documentos com ao menos um produto: 127,574 de 185,409
+- Pares documento × produto: 172,497 (principal: 143,902; citado: 28,595)
+- Documentos com produto principal (título ou palavras-chave): 120,185
 
 ## Cobertura por tipo de documento (%)
 | tipo       |    % |
 |:-----------|-----:|
-| publicacao | 68.4 |
+| publicacao | 68.5 |
 | projeto    | 77.4 |
 | tecnologia | 86.1 |
 
@@ -22,8 +22,8 @@ Exportação 2026-09. Taxonomia `ref/produtos.csv` (104 produtos). Texto: títul
 | Pastagens e forrageiras    |        16921 |
 | Hortaliças                 |        11206 |
 | Produtos de origem animal  |         7521 |
+| Estimulantes e especiarias |         6127 |
 | Silvicultura               |         6033 |
-| Estimulantes e especiarias |         5886 |
 | Fibras                     |         4909 |
 | Oleaginosas e palmeiras    |         3767 |
 | Aquicultura                |         3539 |
@@ -44,9 +44,9 @@ Exportação 2026-09. Taxonomia `ref/produtos.csv` (104 produtos). Texto: títul
 | Arroz                                |         5673 |
 | Uva                                  |         4733 |
 | Trigo                                |         3687 |
+| Café                                 |         3518 |
 | Mandioca                             |         3434 |
 | Sorgo                                |         3330 |
-| Café                                 |         3276 |
 | Algodão                              |         3227 |
 | Peixes (geral)                       |         3053 |
 | Cana-de-açúcar                       |         2795 |
