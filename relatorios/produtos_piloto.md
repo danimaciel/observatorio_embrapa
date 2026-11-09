@@ -2,9 +2,9 @@
 
 Exportação 2026-10. Taxonomia `ref/produtos.csv` (104 produtos). Texto: título + resumo + palavras-chave.
 
-- Documentos com ao menos um produto: 127,574 de 185,409
-- Pares documento × produto: 172,497 (principal: 143,902; citado: 28,595)
-- Documentos com produto principal (título ou palavras-chave): 120,185
+- Documentos com ao menos um produto: 127,578 de 185,409
+- Pares documento × produto: 172,502 (principal: 143,908; citado: 28,594)
+- Documentos com produto principal (título ou palavras-chave): 120,191
 
 ## Cobertura por tipo de documento (%)
 | tipo       |    % |
@@ -22,7 +22,7 @@ Exportação 2026-10. Taxonomia `ref/produtos.csv` (104 produtos). Texto: títul
 | Pastagens e forrageiras    |        16921 |
 | Hortaliças                 |        11206 |
 | Produtos de origem animal  |         7521 |
-| Estimulantes e especiarias |         6127 |
+| Estimulantes e especiarias |         6131 |
 | Silvicultura               |         6033 |
 | Fibras                     |         4909 |
 | Oleaginosas e palmeiras    |         3767 |
@@ -44,7 +44,7 @@ Exportação 2026-10. Taxonomia `ref/produtos.csv` (104 produtos). Texto: títul
 | Arroz                                |         5673 |
 | Uva                                  |         4733 |
 | Trigo                                |         3687 |
-| Café                                 |         3518 |
+| Café                                 |         3523 |
 | Mandioca                             |         3434 |
 | Sorgo                                |         3330 |
 | Algodão                              |         3227 |

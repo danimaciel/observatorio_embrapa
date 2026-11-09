@@ -94,9 +94,9 @@ P = [
      [f"{PEX}:1.13 - Pequi (fruto)", f"{PEX}:1.11 - Mangaba (fruto)", f"{PEX}:1.17 - Umbu (fruto)", f"{PEX}:1.4 - Cajá (fruto)", f"{PEX}:1.3 - Buriti (fruto)", f"{PEX}:1.2 - Baru ou Cumaru (amêndoa)"],
      "pequi|pequizeiro*|mangaba|mangabeira*|umbu|umbuzeiro*|caja|cajazeira*|buriti|baru|cagaita|araticum|cumbaru", "", ""),
     # ---- estimulantes e especiarias
-    ("cafe", "Café", LP, ES, [f"{PAM}:Café (em grão) Total", f"{PAM}:Café (em grão) Arábica", f"{PAM}:Café (em grão) Canephora"], "cafe|cafes|cafeeir*|cafeicultura|cafeicultor*|cafeicola*|cafezal|cafezais|coffea|coffee|coffee-*|canephora|canefora*|conilon|conillon|arabica|arabicas|robusta|robustas|leucoptera coffeella|hemileia vastatrix|hypothenemus hampei", "Coffea arabica; Coffea canephora",
+    ("cafe", "Café", LP, ES, [f"{PAM}:Café (em grão) Total", f"{PAM}:Café (em grão) Arábica", f"{PAM}:Café (em grão) Canephora"], "cafe|cafes|cafeeir*|cafeicultura|cafeicultor*|cafeicola*|cafezal|cafezais|coffea|coffee|coffees|coffee-*|broca-do-cafe|canephora|canefora*|conilon|conillon|arabica|arabicas|robusta|robustas|leucoptera coffeella|hemileia vastatrix|hypothenemus hampei", "Coffea arabica; Coffea canephora",
      # "arabica" e "robusta" sozinhos são ambíguos (adjetivo, goma arábica): só contam com uma palavra inequívoca de café
-     "cafe|cafes|cafeeir*|cafeicultura|cafeicultor*|cafeicola*|cafezal|cafezais|coffea|coffee|coffee-*|canephora|canefora*|conilon|conillon|leucoptera coffeella|hemileia vastatrix|hypothenemus hampei"),
+     "cafe|cafes|cafeeir*|cafeicultura|cafeicultor*|cafeicola*|cafezal|cafezais|coffea|coffee|coffees|coffee-*|broca-do-cafe|canephora|canefora*|conilon|conillon|leucoptera coffeella|hemileia vastatrix|hypothenemus hampei"),
     ("cacau", "Cacau", LP, ES, [f"{PAM}:Cacau (em amêndoa)"], "cacau|cacaueiro*|cacauicultura|theobroma cacao|chocolate", "Theobroma cacao", ""),
     ("erva_mate", "Erva-mate", LP, ES, [f"{PAM}:Erva-mate (folha verde)", f"{PEX}:1.8 - Erva-mate"], "erva-mate|erva mate|ervais|ilex paraguariensis|chimarrao", "Ilex paraguariensis", ""),
     ("guarana", "Guaraná", LP, ES, [f"{PAM}:Guaraná (semente)"], "guarana|guaranazeiro*|paullinia cupana", "Paullinia cupana", ""),
