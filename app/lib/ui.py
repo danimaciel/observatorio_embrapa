@@ -129,9 +129,11 @@ def rede_pyvis(nos: pd.DataFrame, arestas: pd.DataFrame, altura: int = 620,
                      size=8 + 22 * float(e), color=cor, x=float(x) * raio, y=float(y) * raio,
                      physics=False, font={"size": 15, "strokeWidth": 4, "strokeColor": "#ffffff"},
                      borderWidth=4 if destaque and n["id"] == destaque else 1)
-    wmax = arestas["peso"].max() if not arestas.empty else 1
+    # float() em tudo que vai para o pyvis: tipos do NumPy (ex.: o cosseno em float32 da proximidade temática)
+    # não passam pelo JSON do template do pyvis
+    wmax = float(arestas["peso"].max()) if not arestas.empty else 1.0
     for _, a in arestas.iterrows():
-        rel = float(a["peso"]) / wmax
+        rel = float(a["peso"]) / (wmax or 1.0)
         net.add_edge(str(a["origem"]), str(a["destino"]), title=str(a.get("titulo", "")),
                      width=0.5 + 6 * rel, color={"color": "#8a96a3", "opacity": 0.25 + 0.5 * rel})
     net.set_options("""{
